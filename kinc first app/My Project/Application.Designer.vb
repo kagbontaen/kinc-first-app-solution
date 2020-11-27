@@ -32,7 +32,7 @@ Namespace My
         
         <Global.System.Diagnostics.DebuggerStepThroughAttribute()>  _
         Protected Overrides Sub OnCreateMainForm()
-            Me.MainForm = Global.kinc_first_app.Form1
+            Me.MainForm = Global.kinc_first_app.SplashScreen2
         End Sub
         
         <Global.System.Diagnostics.DebuggerStepThroughAttribute()>  _

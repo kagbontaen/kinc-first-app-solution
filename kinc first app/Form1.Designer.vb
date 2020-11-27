@@ -23,35 +23,35 @@ Partial Class Form1
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Me.Button1 = New System.Windows.Forms.Button()
-        Me.Label1 = New System.Windows.Forms.Label()
+        Me.btn_apk = New System.Windows.Forms.Button()
+        Me.lbl_apkpath = New System.Windows.Forms.Label()
         Me.Adbpathdialog = New System.Windows.Forms.OpenFileDialog()
         Me.Button2 = New System.Windows.Forms.Button()
         Me.btn_about = New System.Windows.Forms.Button()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
-        Me.filegetr = New System.Windows.Forms.Label()
+        Me.lbl_adbpath = New System.Windows.Forms.Label()
         Me.BindingSource1 = New System.Windows.Forms.BindingSource(Me.components)
         Me.GroupBox1.SuspendLayout()
         CType(Me.BindingSource1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
-        'Button1
+        'btn_apk
         '
-        Me.Button1.Location = New System.Drawing.Point(420, 42)
-        Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(93, 36)
-        Me.Button1.TabIndex = 0
-        Me.Button1.Text = "Select APK"
-        Me.Button1.UseVisualStyleBackColor = True
+        Me.btn_apk.Location = New System.Drawing.Point(420, 42)
+        Me.btn_apk.Name = "btn_apk"
+        Me.btn_apk.Size = New System.Drawing.Size(93, 36)
+        Me.btn_apk.TabIndex = 0
+        Me.btn_apk.Text = "Select APK"
+        Me.btn_apk.UseVisualStyleBackColor = True
         '
-        'Label1
+        'lbl_apkpath
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(417, 26)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(39, 13)
-        Me.Label1.TabIndex = 1
-        Me.Label1.Text = "Label1"
+        Me.lbl_apkpath.AutoSize = True
+        Me.lbl_apkpath.Location = New System.Drawing.Point(417, 26)
+        Me.lbl_apkpath.Name = "lbl_apkpath"
+        Me.lbl_apkpath.Size = New System.Drawing.Size(51, 13)
+        Me.lbl_apkpath.TabIndex = 1
+        Me.lbl_apkpath.Text = "Apk Path"
         '
         'Adbpathdialog
         '
@@ -80,7 +80,7 @@ Partial Class Form1
         'GroupBox1
         '
         Me.GroupBox1.Controls.Add(Me.Button2)
-        Me.GroupBox1.Controls.Add(Me.filegetr)
+        Me.GroupBox1.Controls.Add(Me.lbl_adbpath)
         Me.GroupBox1.Location = New System.Drawing.Point(414, 98)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Size = New System.Drawing.Size(350, 62)
@@ -88,14 +88,14 @@ Partial Class Form1
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Currently using ADB from"
         '
-        'filegetr
+        'lbl_adbpath
         '
-        Me.filegetr.AutoSize = True
-        Me.filegetr.Location = New System.Drawing.Point(6, 16)
-        Me.filegetr.Name = "filegetr"
-        Me.filegetr.Size = New System.Drawing.Size(60, 13)
-        Me.filegetr.TabIndex = 0
-        Me.filegetr.Text = "no adb.exe"
+        Me.lbl_adbpath.AutoSize = True
+        Me.lbl_adbpath.Location = New System.Drawing.Point(6, 16)
+        Me.lbl_adbpath.Name = "lbl_adbpath"
+        Me.lbl_adbpath.Size = New System.Drawing.Size(60, 13)
+        Me.lbl_adbpath.TabIndex = 0
+        Me.lbl_adbpath.Text = "no adb.exe"
         '
         'Form1
         '
@@ -104,8 +104,8 @@ Partial Class Form1
         Me.ClientSize = New System.Drawing.Size(800, 450)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btn_about)
-        Me.Controls.Add(Me.Label1)
-        Me.Controls.Add(Me.Button1)
+        Me.Controls.Add(Me.lbl_apkpath)
+        Me.Controls.Add(Me.btn_apk)
         Me.Name = "Form1"
         Me.Text = "Form1"
         Me.GroupBox1.ResumeLayout(False)
@@ -116,12 +116,12 @@ Partial Class Form1
 
     End Sub
 
-    Friend WithEvents Button1 As Button
-    Friend WithEvents Label1 As Label
+    Friend WithEvents btn_apk As Button
+    Friend WithEvents lbl_apkpath As Label
     Friend WithEvents Adbpathdialog As OpenFileDialog
     Friend WithEvents Button2 As Button
     Friend WithEvents btn_about As Button
     Friend WithEvents GroupBox1 As GroupBox
-    Friend WithEvents filegetr As Label
+    Friend WithEvents lbl_adbpath As Label
     Friend WithEvents BindingSource1 As BindingSource
 End Class

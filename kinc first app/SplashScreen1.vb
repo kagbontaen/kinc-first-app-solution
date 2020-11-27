@@ -31,19 +31,21 @@
         'Copyright info
         Copyright.Text = My.Application.Info.Copyright
         '   NewMethod()
-        Dim v = Shell("ping.exe -n 5 127.0.0.1", 6, True,)
+        Dim v = Shell("ping.exe -n 5 127.0.0.1", AppWinStyle.MinimizedNoFocus, Wait:=True, 5000)
         Dim p = Process.GetProcessesByName("ping")
         If p.Count = 0 Then
-            Form1.Show()
-            Form1.Activate()
+            'Form1.Show()
+            'Form1.Activate()
         End If
+        My.Application.MinimumSplashScreenDisplayTime = 2000
         Me.Close()
     End Sub
 
-    'Private Shared Sub NewMethod()
-    '    Form1.Load()
-    '   Form1.Show()
-    'End Sub
+    Public Sub New()
+        '    Form1.Load()
+        InitializeComponent()
+        '   Form1.Show()
+    End Sub
 
     Private Sub MainLayoutPanel_Paint(sender As Object, e As PaintEventArgs) Handles MainLayoutPanel.Paint
 

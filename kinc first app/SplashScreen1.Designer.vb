@@ -42,8 +42,8 @@ Partial Class SplashScreen1
         Me.MainLayoutPanel.BackgroundImage = CType(resources.GetObject("MainLayoutPanel.BackgroundImage"), System.Drawing.Image)
         Me.MainLayoutPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
         Me.MainLayoutPanel.ColumnCount = 2
-        Me.MainLayoutPanel.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 243.0!))
-        Me.MainLayoutPanel.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100.0!))
+        Me.MainLayoutPanel.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.MainLayoutPanel.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
         Me.MainLayoutPanel.Controls.Add(Me.DetailsLayoutPanel, 1, 1)
         Me.MainLayoutPanel.Controls.Add(Me.ApplicationTitle, 1, 0)
         Me.MainLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill
@@ -63,11 +63,11 @@ Partial Class SplashScreen1
         Me.DetailsLayoutPanel.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 142.0!))
         Me.DetailsLayoutPanel.Controls.Add(Me.Version, 0, 0)
         Me.DetailsLayoutPanel.Controls.Add(Me.Copyright, 0, 1)
-        Me.DetailsLayoutPanel.Location = New System.Drawing.Point(246, 221)
+        Me.DetailsLayoutPanel.Location = New System.Drawing.Point(251, 221)
         Me.DetailsLayoutPanel.Name = "DetailsLayoutPanel"
         Me.DetailsLayoutPanel.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.0!))
         Me.DetailsLayoutPanel.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.0!))
-        Me.DetailsLayoutPanel.Size = New System.Drawing.Size(247, 79)
+        Me.DetailsLayoutPanel.Size = New System.Drawing.Size(242, 79)
         Me.DetailsLayoutPanel.TabIndex = 1
         '
         'Version
@@ -97,9 +97,9 @@ Partial Class SplashScreen1
         Me.ApplicationTitle.Anchor = System.Windows.Forms.AnchorStyles.None
         Me.ApplicationTitle.BackColor = System.Drawing.Color.Transparent
         Me.ApplicationTitle.Font = New System.Drawing.Font("Microsoft Sans Serif", 18.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.ApplicationTitle.Location = New System.Drawing.Point(246, 3)
+        Me.ApplicationTitle.Location = New System.Drawing.Point(251, 3)
         Me.ApplicationTitle.Name = "ApplicationTitle"
-        Me.ApplicationTitle.Size = New System.Drawing.Size(247, 212)
+        Me.ApplicationTitle.Size = New System.Drawing.Size(242, 212)
         Me.ApplicationTitle.TabIndex = 0
         Me.ApplicationTitle.Text = "Application Title"
         Me.ApplicationTitle.TextAlign = System.Drawing.ContentAlignment.BottomLeft

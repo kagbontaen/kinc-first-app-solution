@@ -30,24 +30,15 @@
 
         'Copyright info
         Copyright.Text = My.Application.Info.Copyright
-        '   NewMethod()
-        Dim v = Shell("ping.exe -n 5 127.0.0.1", AppWinStyle.MinimizedNoFocus, Wait:=True, 5000)
-        Dim p = Process.GetProcessesByName("ping")
-        If p.Count = 0 Then
-            'Form1.Show()
-            'Form1.Activate()
+        If My.Application.MinimumSplashScreenDisplayTime = 5000 Then
+            Stop
         End If
-        My.Application.MinimumSplashScreenDisplayTime = 2000
-        Me.Close()
-    End Sub
-
-    Public Sub New()
-        '    Form1.Load()
-        InitializeComponent()
-        '   Form1.Show()
+        Form1.CheckIfRunning(adb:="adb")
+        'this is meant to cause a delay of 5 seconds while splash is being displayed but i haven't gotten it to work yet
     End Sub
 
     Private Sub MainLayoutPanel_Paint(sender As Object, e As PaintEventArgs) Handles MainLayoutPanel.Paint
+
 
     End Sub
 End Class

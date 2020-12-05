@@ -23,9 +23,9 @@ or make sure adb.exe exist in the same directory as this application"
 
 
     Public Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Call CheckIfRunning()                                                           'checking if ADB is already running
-        Call Testadbpath()                                                              'testing for adb in PATH directories
-        Call Getlaunchparam()                                                           'collecting launch arguments and parameters
+        Call CheckIfRunning(adb:="adb")                                 'checking if ADB is already running
+        Call Testadbpath()                                              'testing for adb in PATH directories: to be moved to checkifrunning
+        Call Getlaunchparam()                                           'collecting launch arguments and parameters
     End Sub
 
 
@@ -34,12 +34,19 @@ or make sure adb.exe exist in the same directory as this application"
         Dim adbpathdialog As OpenFileDialog = New OpenFileDialog With {
             .Filter = "Android Application|*.apk|All Files|*.*",
             .Title = "Select Location of Adb Binary",
-            .InitialDirectory = CurDir()
+        .InitialDirectory = "c:\kk\apk",                    '.InitialDirectory = CurDir(),
+            .RestoreDirectory = True,
+            .Multiselect = True
         }
+
         adbpathdialog.ShowDialog()
-        apkpath = adbpathdialog.FileName
-        lbl_apkpath.Text = apkpath
-        Call Apkinstaller(apkpath)
+        'apkpaths().Length = adbpathdialog.FileNames().Length
+        For i As Integer = 0 To adbpathdialog.FileNames.Length - 1
+            lbl_apkpath.Text = adbpathdialog.FileNames(i)
+            Call Apkinstaller(adbpathdialog.FileNames(i))
+        Next
+        'lbl_apkpath.Text = apkpath
+        'Call Apkinstaller(apkpath)
     End Sub
 
     Private Sub Label1_Click(sender As Object, e As EventArgs) Handles lbl_apkpath.Click
@@ -50,7 +57,8 @@ or make sure adb.exe exist in the same directory as this application"
         Dim apkpathdialog As OpenFileDialog = New OpenFileDialog With {
             .Filter = "Application|*.exe|All Files|*.*",
             .Title = "Select Location of Adb Binary",
-            .InitialDirectory = CurDir()
+            .InitialDirectory = CurDir(),
+            .RestoreDirectory = True
         }
         apkpathdialog.ShowDialog()
         Adbpath = apkpathdialog.FileName
@@ -67,13 +75,11 @@ or make sure adb.exe exist in the same directory as this application"
         AboutBox1.Show()
     End Sub
 
-    Public Function CheckIfRunning()
-        If (Process.GetProcessesByName("adb").Count > 0) Then
-            lbl_apkpath.Text = "adb Is already running"
+    Public Function CheckIfRunning(adb As String)
+        If (Process.GetProcessesByName(adb).Count > 0) Then
+            lbl_apkpath.Text = adb + " Is already running"
         Else
-            lbl_apkpath.Text = "adb Is Not running"
-            Process.Start(Adbpath, "start-server").WaitForExit()
-
+            lbl_apkpath.Text = adb + " Is Not running"
         End If
         Return Process.GetProcessesByName("adb")
     End Function
@@ -87,12 +93,13 @@ or make sure adb.exe exist in the same directory as this application"
             .StartInfo.Arguments = "wait-for-any-device"
             '.StartInfo.Arguments = "devices"
             .Start()
-            .StartInfo.WindowStyle = ProcessWindowStyle.Minimized
+            .StartInfo.WindowStyle = 1
             .WaitForExit()
         End With
-
-        Dim output As String = waitfordevices.StandardOutput.ReadToEnd()
-        Return output
+        If waitfordevices.HasExited Then
+            Dim output As String = waitfordevices.StandardOutput.ReadToEnd()
+            Return output
+        End If
 
         '        Return adbdev
     End Function
@@ -111,7 +118,7 @@ or make sure adb.exe exist in the same directory as this application"
                     Adbpath = adbtestpath + "\adb.exe"
                     Environment.SetEnvironmentVariable(Adbpath, adbtestpath + "\adb.exe")               ' might end up using this in the end. but it's useless for now
                     lbl_adbpath.Text = Adbpath
-                    MsgBox("adb.exe was found in " + Adbpath,, "Hurray adb.exe has been found")
+                    'MsgBox("adb.exe was found in " + Adbpath,, "Hurray adb.exe has been found")
                     Button2.Text = "Change ADB"
                     Exit For
                 End If
@@ -137,8 +144,8 @@ please use the select adb button to choose an adb.exe binary")
         Dim startargs() As String = Environment.GetCommandLineArgs()
         Select Case startargs.Length
             Case Is <= 1
-                MsgBox(startargs(0))
-                Call Apkinstaller(startargs(0))
+                'MsgBox(startargs(0))
+                'Call Apkinstaller(startargs(0))
                 Exit Function
             Case Else
 
@@ -159,22 +166,26 @@ please use the select adb button to choose an adb.exe binary")
         MsgBox("Installing " + apkpath + " to Device")
         Dim apkinstall As New Process
         With apkinstall
-            .StartInfo.UseShellExecute = False
+            .StartInfo.UseShellExecute = True
             .StartInfo.RedirectStandardOutput = True
             .StartInfo.FileName = Adbpath
             .StartInfo.Arguments = "install " + """" + apkpath + """"
             '.StartInfo.Arguments = "devices"
+            .StartInfo.WindowStyle = 2
             .Start()
-            .StartInfo.WindowStyle = ProcessWindowStyle.Normal
-            .WaitForExit()
+            '.WaitForExit()
         End With
-        MsgBox("adb " + apkinstall.StartInfo.Arguments)                                                  'remove when done or make part of program
         Dim output As String = apkinstall.StandardOutput.ReadToEnd()
+        MsgBox(apkinstall.StandardOutput.ReadToEnd())                                                  'remove when done or make part of program
         Return output
 
         '        Return adbdev
 
     End Function
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        Explorer1.Show()
+    End Sub
 End Class
 
 

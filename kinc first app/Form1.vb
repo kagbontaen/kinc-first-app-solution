@@ -166,7 +166,7 @@ please use the select adb button to choose an adb.exe binary")
         MsgBox("Installing " + apkpath + " to Device")
         Dim apkinstall As New Process
         With apkinstall
-            .StartInfo.UseShellExecute = True
+            .StartInfo.UseShellExecute = False
             .StartInfo.RedirectStandardOutput = True
             .StartInfo.FileName = Adbpath
             .StartInfo.Arguments = "install " + """" + apkpath + """"
@@ -175,7 +175,7 @@ please use the select adb button to choose an adb.exe binary")
             .Start()
             '.WaitForExit()
         End With
-        Dim output As String = apkinstall.StandardOutput.ReadToEnd()
+        Dim output As StringReader = New StringReader(apkinstall.StandardOutput.ReadToEnd())
         MsgBox(apkinstall.StandardOutput.ReadToEnd())                                                  'remove when done or make part of program
         Return output
 

@@ -1,4 +1,5 @@
 ﻿Public NotInheritable Class SplashScreen1
+    Private adbpath As String
 
     'TODO: This form can easily be set as the splash screen for the application by going to the "Application" tab
     '  of the Project Designer ("Properties" under the "Project" menu).
@@ -33,7 +34,7 @@
         If My.Application.MinimumSplashScreenDisplayTime = 5000 Then
             Stop
         End If
-        Form1.CheckIfRunning(adb:="adb")
+        Form1.CheckIfRunning(adbpath)
         'this is meant to cause a delay of 5 seconds while splash is being displayed but i haven't gotten it to work yet
     End Sub
 

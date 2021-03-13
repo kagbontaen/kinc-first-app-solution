@@ -38,11 +38,12 @@ Partial Class Form1
         '
         'btn_apk
         '
+        Me.btn_apk.Enabled = False
         Me.btn_apk.Location = New System.Drawing.Point(420, 42)
         Me.btn_apk.Name = "btn_apk"
         Me.btn_apk.Size = New System.Drawing.Size(93, 36)
         Me.btn_apk.TabIndex = 0
-        Me.btn_apk.Text = "Select APK"
+        Me.btn_apk.Text = "&Select APK"
         Me.btn_apk.UseVisualStyleBackColor = True
         '
         'lbl_apkpath
@@ -51,7 +52,7 @@ Partial Class Form1
         Me.lbl_apkpath.Location = New System.Drawing.Point(417, 26)
         Me.lbl_apkpath.Name = "lbl_apkpath"
         Me.lbl_apkpath.Size = New System.Drawing.Size(51, 13)
-        Me.lbl_apkpath.TabIndex = 1
+        Me.lbl_apkpath.TabIndex = 2
         Me.lbl_apkpath.Text = "Apk Path"
         '
         'Adbpathdialog
@@ -65,8 +66,8 @@ Partial Class Form1
         Me.Button2.Location = New System.Drawing.Point(6, 32)
         Me.Button2.Name = "Button2"
         Me.Button2.Size = New System.Drawing.Size(75, 23)
-        Me.Button2.TabIndex = 2
-        Me.Button2.Text = "Select ADB"
+        Me.Button2.TabIndex = 1
+        Me.Button2.Text = "Select &ADB"
         Me.Button2.UseVisualStyleBackColor = True
         '
         'btn_about
@@ -75,7 +76,7 @@ Partial Class Form1
         Me.btn_about.Name = "btn_about"
         Me.btn_about.Size = New System.Drawing.Size(75, 23)
         Me.btn_about.TabIndex = 3
-        Me.btn_about.Text = "About"
+        Me.btn_about.Text = "A&bout"
         Me.btn_about.UseVisualStyleBackColor = True
         '
         'GroupBox1

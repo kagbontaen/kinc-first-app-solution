@@ -1,0 +1,101 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+kinc ADB Installer VS
+</name>
+</assembly>
+<members>
+<member name="T:kinc_first_app.My.Resources.Resources">
+<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.ResourceManager">
+<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.Culture">
+<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.adb_exe">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.AdbWinApi_dll">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.AdbWinUsbApi_dll">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.cmd_here_exe">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.cyggcc_s_1_dll">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.cygwin1_dll">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.debugfs_exe">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.DrvRemover_exe">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.e2fsck_exe">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.fastboot_exe">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.IMG_20180712_055628">
+<summary>
+  Looks up a localized resource of type System.Drawing.Bitmap.
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.mke2fs_exe">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.Mount_exe">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.sfk_exe">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+<member name="P:kinc_first_app.My.Resources.Resources.tune2fs_exe">
+<summary>
+  Looks up a localized resource of type System.Byte[].
+</summary>
+</member>
+</members>
+</doc>

@@ -4,15 +4,15 @@ Imports Microsoft.Win32
 
 
 Public Class Form1
-    Private Const Promptpath As String = "Environment variable 'PATH' does not exist.
-this is a problem on your end,
-please use the choose adb button to select the adb file
-or make sure adb.exe exist in the same directory as this application"
-    Dim Adbpath, apkpath As String
-#Disable Warning IDE0044 ' Add readonly modifier
-    Dim apkpaths() As String
-    Dim silent, adbfound As Boolean
-#Enable Warning IDE0044 ' Add readonly modifier
+    Private Const Promptpath As String = "Environment variable 'PATH' does not exist." _
+                                         + vbCrLf _
+                                         + "this rarely happens and is a problem on your end," _
+                                         + vbCrLf _
+                                         + "please use the choose adb button to select the adb file" _
+                                         + vbCrLf _
+                                         + "or make sure adb.exe exist in the same directory as this application"
+    Public Adbpath, apkpath, apkpaths() As String
+    Public silent, adbfound As Boolean
 
     Public Sub New()
 
@@ -25,22 +25,24 @@ or make sure adb.exe exist in the same directory as this application"
 
 
     Public Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Call Getlaunchparam()                                        'collecting launch arguments and parameters and determine if running silent
-        Call CheckIfRunning(Adbpath)                                 'checking if ADB is already running
+        Call Getlaunchparam()                                 'collecting launch arguments and parameters and determine if running silent
+        Call CheckIfRunning()                                 'checking if ADB is already running
+        If silent Then Close()
     End Sub
 
 
     Private Sub Btn_APK_Click(sender As Object, e As EventArgs) Handles btn_apk.Click
         Waitfordevice()
-        Dim apkpathdialog As OpenFileDialog = New OpenFileDialog With {
-            .Filter = "Android Application|*.apk|All Files|*.*",
-            .Title = "Select Location of Adb Binary",
-            .InitialDirectory = "c:\kk\apk",                    '.InitialDirectory = CurDir(),
-            .RestoreDirectory = True,
+        Dim apkpathdialog = New OpenFileDialog
+        With apkpathdialog
+            .Filter = "Android Application|*.apk|All Files|*.*"
+            .Title = "Select Location of Adb Binary"
+            .InitialDirectory = "c:\kk\apk"                    ', set this way for testing, change to this when done, .InitialDirectory = CurDir()
+            .RestoreDirectory = True
             .Multiselect = True
-        }
-
-        apkpathdialog.ShowDialog()
+            .DereferenceLinks = True
+            .ShowDialog()
+        End With
         For i As Integer = 0 To apkpathdialog.FileNames.Length - 1
             lbl_apkpath.Text = apkpathdialog.FileNames(i)
             Call Apkinstaller(apkpathdialog.FileNames(i))
@@ -57,11 +59,17 @@ or make sure adb.exe exist in the same directory as this application"
             .Title = "Select Location of Adb Binary"
             .InitialDirectory = CurDir()
             .RestoreDirectory = True
+            .Multiselect = False
+            .ValidateNames = True
+            .CheckFileExists = True
+            .DefaultExt = ".exe"
+            .ShowDialog()
         End With
-        apkpathdialog.ShowDialog()
-        Adbpath = apkpathdialog.FileName
-        lbl_adbpath.Text = Adbpath
-        btn_apk.Visible = True
+        If Not apkpathdialog.FileName = "" Then
+            Adbpath = apkpathdialog.FileName
+            lbl_adbpath.Text = Adbpath
+            btn_apk.Visible = True
+        End If
     End Sub
 
     Public Sub Adbpathdialog_FileOk(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles Adbpathdialog.FileOk
@@ -73,20 +81,28 @@ or make sure adb.exe exist in the same directory as this application"
         AboutBox1.Show()
     End Sub
 
-    Public Function CheckIfRunning(adbpath As String)
+    Public Function CheckIfRunning()
         If (Process.GetProcessesByName("adb").Count > 0) Then
             lbl_apkpath.Text = "adb Is already running"
             Dim objWMIService = GetObject("winmgmts:\\.\root\cimv2")
             Dim colProcess As Object = objWMIService.ExecQuery("Select * from win32_Process " & "Where Name = 'adb.exe'")
             For Each objProcess In colProcess
-                adbpath = objProcess.ExecutablePath
-                MsgBox("adb is currently running" + vbCrLf + "will attempt to use the already running one" + vbCrLf + adbpath)
+                Adbpath = objProcess.ExecutablePath
+                'Dim a As MessageBox
+                'a("adb is currently running and i will" _
+                '       + vbCrLf _
+                '       + "attempt to use the already running one at" _
+                '       + vbCrLf _
+                '       + Adbpath)
+                Call Founadbfound(Adbpath, True)
+                Return Adbpath
+                Exit Function
             Next
         Else
             Call Testadbpath()                                              'testing for adb in PATH directories
             lbl_apkpath.Text = "adb Is Not running"
         End If
-        Return adbpath
+        Return Adbpath
     End Function
 
     Public Function Waitfordevice()
@@ -121,10 +137,7 @@ or make sure adb.exe exist in the same directory as this application"
                 Dim adbtestpath As String = syspatharr(i)
                 If File.Exists(adbtestpath + "\adb.exe") Then
                     Adbpath = adbtestpath + "\adb.exe"
-                    Environment.SetEnvironmentVariable(Adbpath, adbtestpath + "\adb.exe")               ' might end up using this in the end. but it's useless for now
-                    lbl_adbpath.Text = Adbpath
-                    'MsgBox("adb.exe was found in " + Adbpath,, "Hurray adb.exe has been found")
-                    Button2.Text = "Change ADB"
+                    Call Founadbfound(Adbpath, False)
                     Exit For
                 End If
             Next
@@ -133,19 +146,30 @@ or make sure adb.exe exist in the same directory as this application"
             If File.Exists(CurDir() + "\adb.exe") Then
                 Adbpath = CurDir() _
                             + "\adb.exe"
-                lbl_adbpath.Text = Adbpath
-                MsgBox("adb.exe was found in " + Adbpath,, "Hurray adb.exe has been found")
-                Button2.Text = "Change ADB"
+                Call Founadbfound(Adbpath, True)
             Else
-                msgBoxResult = MsgBox("I can't find adb.exe, and i have really searched
-please use the select adb button to choose an adb.exe binary")
-                btn_apk.Visible = False
+                msgBoxResult = MsgBox("I can't find adb.exe, and i have really searched" _
+                                      + vbCrLf _
+                                      + "please use the select adb button to choose an adb.exe binary", MsgBoxStyle.Critical)
+                btn_apk.Enabled = False
                 Button2.Visible = True
             End If
         End Try
         Return Adbpath
     End Function
+    Public Function Founadbfound(adbpath As String, silent As Boolean)
+        Environment.SetEnvironmentVariable(adbpath, adbpath)               ' might end up using this in the end. but it's useless for now
+        lbl_adbpath.Text = adbpath
+        If Not silent Then
+            MsgBox("adb.exe was found in " + adbpath,, "Hurray adb.exe has been found")
+        End If
+        Button2.Text = "Change ADB"
+        btn_apk.Enabled = True
+        Return adbpath
+    End Function
+
     Public Function Getlaunchparam()
+        On Error GoTo Er
         Dim startargs() As String = Environment.GetCommandLineArgs()
         Select Case startargs.Length
             Case Is <= 1
@@ -155,17 +179,22 @@ please use the select adb button to choose an adb.exe binary")
                 Exit Function
             Case Else
                 silent = True
-                Call CheckIfRunning(Adbpath)
+                Call CheckIfRunning()
+                Call Waitfordevice()
                 For i As Integer = 1 To startargs.Length - 1
                     apkpath = startargs(i)
                     Call Apkinstaller(apkpath)
                 Next
-                Return apkpath
-                Form.ActiveForm.Close()
-                My.Application.MinimumSplashScreenDisplayTime = &H1B58
-                On Error Resume Next
+                Return apkpath & " has been installed"
+                Close()
+                Me.Close()
+                Me.Dispose()
+
         End Select
-        MsgBox("an error occurred whle getting program launch parameters", MsgBoxStyle.Critical, "Something is wrong in the force")
+Er:
+        Dim msgBoxEr = MsgBox("an error occurred whle getting program launch parameters",
+               MsgBoxStyle.Critical,
+               "Something is wrong in the force")
         Return "9999"
     End Function
 
@@ -183,18 +212,20 @@ please use the select adb button to choose an adb.exe binary")
             '.WaitForExit()
         End With
 
+        Dim ed As String = apkinstall.StandardOutput.ReadToEnd.ToString()
 
-        Dim output As StringReader = New StringReader(apkinstall.StandardOutput.ReadToEnd())
+        'Dim output As StringReader = New StringReader(apkinstall.StandardOutput.ReadToEnd())
 
-        Dim unused = output.ReadLine
-        MsgBox(unused)                                              'remove when done or make part of program
-        Return output.ReadToEnd
+        'Dim unused = output.ReadLine
+        MsgBox(ed)                                              'remove when done or make part of program
+        Return ed
 
         '        Return adbdev
 
     End Function
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        Me.Hide()
         Explorer1.Show()
     End Sub
 End Class

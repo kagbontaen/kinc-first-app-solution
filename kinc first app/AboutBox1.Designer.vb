@@ -16,11 +16,9 @@ Partial Class AboutBox1
 
     Friend WithEvents TableLayoutPanel As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents LogoPictureBox As System.Windows.Forms.PictureBox
-    Friend WithEvents LabelProductName As System.Windows.Forms.Label
     Friend WithEvents LabelVersion As System.Windows.Forms.Label
     Friend WithEvents LabelCompanyName As System.Windows.Forms.Label
     Friend WithEvents TextBoxDescription As System.Windows.Forms.TextBox
-    Friend WithEvents OKButton As System.Windows.Forms.Button
     Friend WithEvents LabelCopyright As System.Windows.Forms.Label
 
     'Required by the Windows Form Designer
@@ -29,17 +27,18 @@ Partial Class AboutBox1
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(AboutBox1))
         Me.TableLayoutPanel = New System.Windows.Forms.TableLayoutPanel()
         Me.LogoPictureBox = New System.Windows.Forms.PictureBox()
-        Me.LabelProductName = New System.Windows.Forms.Label()
         Me.LabelVersion = New System.Windows.Forms.Label()
         Me.LabelCopyright = New System.Windows.Forms.Label()
         Me.LabelCompanyName = New System.Windows.Forms.Label()
         Me.TextBoxDescription = New System.Windows.Forms.TextBox()
         Me.OKButton = New System.Windows.Forms.Button()
+        Me.LabelProductName = New System.Windows.Forms.Label()
+        Me.License = New System.Windows.Forms.Button()
         Me.TableLayoutPanel.SuspendLayout()
         CType(Me.LogoPictureBox, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -83,18 +82,6 @@ Partial Class AboutBox1
         Me.LogoPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize
         Me.LogoPictureBox.TabIndex = 0
         Me.LogoPictureBox.TabStop = False
-        '
-        'LabelProductName
-        '
-        Me.LabelProductName.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.LabelProductName.Location = New System.Drawing.Point(136, 0)
-        Me.LabelProductName.Margin = New System.Windows.Forms.Padding(6, 0, 3, 0)
-        Me.LabelProductName.MaximumSize = New System.Drawing.Size(0, 17)
-        Me.LabelProductName.Name = "LabelProductName"
-        Me.LabelProductName.Size = New System.Drawing.Size(257, 17)
-        Me.LabelProductName.TabIndex = 0
-        Me.LabelProductName.Text = "Product Name"
-        Me.LabelProductName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
         '
         'LabelVersion
         '
@@ -156,12 +143,35 @@ Partial Class AboutBox1
         Me.OKButton.TabIndex = 0
         Me.OKButton.Text = "&OK"
         '
+        'LabelProductName
+        '
+        Me.LabelProductName.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.LabelProductName.Location = New System.Drawing.Point(136, 0)
+        Me.LabelProductName.Margin = New System.Windows.Forms.Padding(6, 0, 3, 0)
+        Me.LabelProductName.MaximumSize = New System.Drawing.Size(0, 17)
+        Me.LabelProductName.Name = "LabelProductName"
+        Me.LabelProductName.Size = New System.Drawing.Size(257, 17)
+        Me.LabelProductName.TabIndex = 0
+        Me.LabelProductName.Text = "Product Name"
+        Me.LabelProductName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        '
+        'License
+        '
+        Me.License.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.License.DialogResult = System.Windows.Forms.DialogResult.Cancel
+        Me.License.Location = New System.Drawing.Point(325, 80)
+        Me.License.Name = "License"
+        Me.License.Size = New System.Drawing.Size(75, 23)
+        Me.License.TabIndex = 1
+        Me.License.Text = "&Licenses"
+        '
         'AboutBox1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.OKButton
         Me.ClientSize = New System.Drawing.Size(414, 276)
+        Me.Controls.Add(Me.License)
         Me.Controls.Add(Me.TableLayoutPanel)
         Me.Font = New System.Drawing.Font("Segoe UI", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D
@@ -179,4 +189,7 @@ Partial Class AboutBox1
 
     End Sub
 
+    Friend WithEvents LabelProductName As Label
+    Friend WithEvents OKButton As Button
+    Friend WithEvents License As Button
 End Class

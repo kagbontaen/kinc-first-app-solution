@@ -82,8 +82,8 @@ Public Class Form1
     End Sub
 
     Public Function CheckIfRunning()
-        If (Process.GetProcessesByName("adb").Count > 0) Then
-            lbl_apkpath.Text = "adb Is already running"
+        If Process.GetProcessesByName("adb").Count > 0 Then
+            GroupBox1.Text = "adb Is already running from"
             Dim objWMIService = GetObject("winmgmts:\\.\root\cimv2")
             Dim colProcess As Object = objWMIService.ExecQuery("Select * from win32_Process " & "Where Name = 'adb.exe'")
             For Each objProcess In colProcess
@@ -94,7 +94,7 @@ Public Class Form1
                 '       + "attempt to use the already running one at" _
                 '       + vbCrLf _
                 '       + Adbpath)
-                Call Founadbfound(Adbpath, True)
+                Call Func_adbfound(Adbpath, True)
                 Return Adbpath
                 Exit Function
             Next
@@ -137,7 +137,7 @@ Public Class Form1
                 Dim adbtestpath As String = syspatharr(i)
                 If File.Exists(adbtestpath + "\adb.exe") Then
                     Adbpath = adbtestpath + "\adb.exe"
-                    Call Founadbfound(Adbpath, False)
+                    Call Func_adbfound(Adbpath, False)
                     Exit For
                 End If
             Next
@@ -146,7 +146,7 @@ Public Class Form1
             If File.Exists(CurDir() + "\adb.exe") Then
                 Adbpath = CurDir() _
                             + "\adb.exe"
-                Call Founadbfound(Adbpath, True)
+                Call Func_adbfound(Adbpath, True)
             Else
                 msgBoxResult = MsgBox("I can't find adb.exe, and i have really searched" _
                                       + vbCrLf _
@@ -157,11 +157,11 @@ Public Class Form1
         End Try
         Return Adbpath
     End Function
-    Public Function Founadbfound(adbpath As String, silent As Boolean)
-        Environment.SetEnvironmentVariable(adbpath, adbpath)               ' might end up using this in the end. but it's useless for now
+    Public Function Func_adbfound(adbpath As String, silent As Boolean)
+        Environment.SetEnvironmentVariable("adbpath", adbpath)               ' might end up using this in the end. but it's useless for now
         lbl_adbpath.Text = adbpath
         If Not silent Then
-            MsgBox("adb.exe was found in " + adbpath,, "Hurray adb.exe has been found")
+            MsgBox("adb.exe was found in " + adbpath + vbCrLf + "I will therefore use it",, "Hurray adb.exe has been found")
         End If
         Button2.Text = "Change ADB"
         btn_apk.Enabled = True

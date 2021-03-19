@@ -113,7 +113,8 @@ Public Class Explorer1
 
     Private Sub SetView(ByVal View As System.Windows.Forms.View)
         'Figure out which menu item should be checked
-        Dim MenuItemToCheck As ToolStripMenuItem = Nothing
+        Dim MenuItemToCheck As ToolStripMenuItem
+
         Select Case View
             Case View.Details
                 MenuItemToCheck = DetailsToolStripMenuItem
@@ -165,9 +166,10 @@ Public Class Explorer1
     End Sub
 
     Private Sub OpenToolStripMenuItem_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles OpenToolStripMenuItem.Click
-        Dim OpenFileDialog As New OpenFileDialog
-        OpenFileDialog.InitialDirectory = My.Computer.FileSystem.SpecialDirectories.MyDocuments
-        OpenFileDialog.Filter = "Android Application (*.apk)|*.apk|All Files|*.*"
+        Dim OpenFileDialog As New OpenFileDialog With {
+            .InitialDirectory = My.Computer.FileSystem.SpecialDirectories.MyDocuments,
+            .Filter = "Android Application (*.apk)|*.apk|All Files|*.*"
+        }
         OpenFileDialog.ShowDialog(Me)
 
         Dim FileName As String = OpenFileDialog.FileName
@@ -175,9 +177,10 @@ Public Class Explorer1
     End Sub
 
     Private Sub SaveAsToolStripMenuItem_Click(ByVal sender As Object, ByVal e As EventArgs) Handles SaveAsToolStripMenuItem.Click
-        Dim SaveFileDialog As New SaveFileDialog
-        SaveFileDialog.InitialDirectory = My.Computer.FileSystem.SpecialDirectories.MyDocuments
-        SaveFileDialog.Filter = "Text Files (*.txt)|*.txt"
+        Dim SaveFileDialog As New SaveFileDialog With {
+            .InitialDirectory = My.Computer.FileSystem.SpecialDirectories.MyDocuments,
+            .Filter = "Text Files (*.txt)|*.txt"
+        }
         SaveFileDialog.ShowDialog(Me)
 
         Dim FileName As String = SaveFileDialog.FileName

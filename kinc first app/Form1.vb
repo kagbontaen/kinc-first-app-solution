@@ -214,7 +214,7 @@ Er:
             .StartInfo.UseShellExecute = False
             .StartInfo.RedirectStandardOutput = True
             .StartInfo.FileName = Adbpath
-            .StartInfo.Arguments = "install -rg " + """" + apkpath + """"
+            .StartInfo.Arguments = "install -r " + """" + apkpath + """"
             .StartInfo.WindowStyle = 1
             .Start()
             '.WaitForExit()

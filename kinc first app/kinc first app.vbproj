@@ -48,8 +48,9 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DocumentationFile>kinc ADB Installer VS.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
-    <Prefer32Bit>false</Prefer32Bit>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <Prefer32Bit>true</Prefer32Bit>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -127,10 +128,10 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>074FF33FC23BD0DE745504BD6639B190E2E9933A</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>99B79C721D6ADB3F1BE2A08E715AFC4AA89BA181</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>kinc first app_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>kinc_pfx.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -140,6 +141,12 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>2.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>kinc_pfx.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />
@@ -245,7 +252,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.manifest" />
+    <None Include="kinc first app_1_TemporaryKey.pfx" />
     <None Include="kinc first app_TemporaryKey.pfx" />
+    <None Include="kinc_pfx.pfx" />
     <None Include="My Project\app.manifest" />
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>
@@ -320,6 +329,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="2.ico" />
+    <None Include="Resources\k_logo.png" />
   </ItemGroup>
   <ItemGroup>
     <FileAssociation Include=".apk">

@@ -1,5 +1,6 @@
-﻿Public NotInheritable Class SplashScreen1
-    Private adbpath As String
+﻿Imports System.Threading
+
+Public NotInheritable Class SplashScreen1
 
     'TODO: This form can easily be set as the splash screen for the application by going to the "Application" tab
     '  of the Project Designer ("Properties" under the "Project" menu).
@@ -34,10 +35,6 @@
         My.Application.MinimumSplashScreenDisplayTime = 5000
         'Call Form1.CheckIfRunning()            'this is the best pace for this function but it is yet to be implemented
         'this is meant to cause a delay of 5 seconds while splash is being displayed but i haven't gotten it to work yet
-    End Sub
-
-    Private Sub MainLayoutPanel_Paint(sender As Object, e As PaintEventArgs) Handles MainLayoutPanel.Paint
-
-
+        Dispose()
     End Sub
 End Class

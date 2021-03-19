@@ -26,8 +26,12 @@ Public Class Form1
 
     Public Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Call Getlaunchparam()                                 'collecting launch arguments and parameters and determine if running silent
+        If silent Then
+            Dispose(disposing:=True)
+            Application.ExitThread()
+            Exit Sub
+        End If
         Call CheckIfRunning()                                 'checking if ADB is already running
-        If silent Then Close()
     End Sub
 
 
@@ -53,8 +57,8 @@ Public Class Form1
 
 
     Private Sub Button2_Click(a As Object, e As EventArgs) Handles Button2.Click
-        Dim apkpathdialog = New OpenFileDialog
-        With apkpathdialog
+        Dim adbpathdialog = New OpenFileDialog
+        With adbpathdialog
             .Filter = "Application|*.exe|All Files|*.*"
             .Title = "Select Location of Adb Binary"
             .InitialDirectory = CurDir()
@@ -65,8 +69,8 @@ Public Class Form1
             .DefaultExt = ".exe"
             .ShowDialog()
         End With
-        If Not apkpathdialog.FileName = "" Then
-            Adbpath = apkpathdialog.FileName
+        If Not adbpathdialog.FileName = "" Then
+            Adbpath = adbpathdialog.FileName
             lbl_adbpath.Text = Adbpath
             btn_apk.Visible = True
         End If
@@ -168,6 +172,10 @@ Public Class Form1
         Return adbpath
     End Function
 
+    Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+        PictureBox1.Hide()
+    End Sub
+
     Public Function Getlaunchparam()
         On Error GoTo Er
         Dim startargs() As String = Environment.GetCommandLineArgs()
@@ -187,8 +195,7 @@ Public Class Form1
                 Next
                 Return apkpath & " has been installed"
                 Close()
-                Me.Close()
-                Me.Dispose()
+                'Me.Dispose()
 
         End Select
 Er:
@@ -199,20 +206,23 @@ Er:
     End Function
 
     Public Function Apkinstaller(apkpath As String)
-        MsgBox("Installing " + apkpath + " to Device")
+        If Not silent Then
+            MsgBox("Installing " + apkpath + " to Device")
+        End If
         Dim apkinstall As New Process
         With apkinstall
             .StartInfo.UseShellExecute = False
             .StartInfo.RedirectStandardOutput = True
             .StartInfo.FileName = Adbpath
-            .StartInfo.Arguments = "install " + """" + apkpath + """"
-            '.StartInfo.Arguments = "devices"
-            .StartInfo.WindowStyle = 2
+            .StartInfo.Arguments = "install -rg " + """" + apkpath + """"
+            .StartInfo.WindowStyle = 1
             .Start()
             '.WaitForExit()
         End With
+        'apkinstall.StartInfo.EnvironmentVariables = "@echo on"
 
         Dim ed As String = apkinstall.StandardOutput.ReadToEnd.ToString()
+        'Dim tmp As New StreamWriter               'looking for a cmd-like output for the program
 
         'Dim output As StringReader = New StringReader(apkinstall.StandardOutput.ReadToEnd())
 

@@ -329,6 +329,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="2.ico" />
+    <None Include="Resources\k_logo.png" />
   </ItemGroup>
   <ItemGroup>
     <FileAssociation Include=".apk">

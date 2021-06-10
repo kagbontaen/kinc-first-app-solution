@@ -51,13 +51,10 @@ Public Class Form1
             apklistgrp.Visible = True
         End If
         For i As Integer = 0 To apkpathdialog.FileNames.Length - 1
-            Dim qapkpath As String = apkpathdialog.FileNames(i)
-            Dim qapkpatharr() As String
-            qapkpatharr = qapkpath.Split("\")
 
 
             lbl_apkpath.Text = apkpathdialog.FileNames(i)
-            apklistbox.Items.Add(qapkpatharr.LastOrDefault) 'GetValue(qapkpatharr.Last)) 'don't judge me, i was tired and this fix was taking too much time
+            apklistbox.Items.Add(apkpathdialog.FileNames(i).Split("\").LastOrDefault) 'GetValue(qapkpatharr.Last)) 'don't judge me, i was tired and this fix was taking too much time
             Call Apkinstaller(apkpathdialog.FileNames(i))
         Next
         'lbl_apkpath.Text = apkpath
@@ -154,13 +151,11 @@ Public Class Form1
     Public Function Testadbpath()
         Try
             Dim syspath As String = My.Application.GetEnvironmentVariable("PATH")
-            Dim syspatharr() As String
-            syspatharr = syspath.Split(";")
 
-            For i As Integer = 0 To syspatharr.Length - 1
-                Dim adbtestpath As String = syspatharr(i)
-                If File.Exists(adbtestpath + "\adb.exe") Then
-                    Adbpath = adbtestpath + "\adb.exe"
+            For i As Integer = 0 To syspath.Split(";").Length - 1
+                Dim adbtestpath As String = syspath.Split(";")(i)
+                If File.Exists(path:=$"{adbtestpath}\adb.exe") Then
+                    Adbpath = $"{adbtestpath}\adb.exe"
                     Call Func_adbfound(Adbpath, False)
                     Exit For
                 End If
@@ -198,8 +193,7 @@ Public Class Form1
 
     Public Function Getlaunchparam()
         On Error GoTo Er
-        Dim startargs() As String = Environment.GetCommandLineArgs()
-        Select Case startargs.Length
+        Select Case Environment.GetCommandLineArgs().Length
             Case Is <= 1
                 silent = False
                 'MsgBox(startargs(0))
@@ -209,8 +203,8 @@ Public Class Form1
                 silent = True
                 Call CheckIfRunning()
                 Call Waitfordevice()
-                For i As Integer = 1 To startargs.Length - 1
-                    apkpath = startargs(i)
+                For i As Integer = 1 To Environment.GetCommandLineArgs().Length - 1
+                    apkpath = Environment.GetCommandLineArgs()(i)
                     Call Apkinstaller(apkpath)
                 Next
                 Return apkpath & " has been installed"

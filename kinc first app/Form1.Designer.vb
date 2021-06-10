@@ -34,9 +34,15 @@ Partial Class Form1
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.BindingSource1 = New System.Windows.Forms.BindingSource(Me.components)
         Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
+        Me.apklbl = New System.Windows.Forms.Label()
+        Me.apklistbox = New System.Windows.Forms.ListBox()
+        Me.apklist = New System.Windows.Forms.BindingSource(Me.components)
+        Me.apklistgrp = New System.Windows.Forms.GroupBox()
         Me.GroupBox1.SuspendLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.BindingSource1, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.apklist, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.apklistgrp.SuspendLayout()
         Me.SuspendLayout()
         '
         'btn_apk
@@ -126,11 +132,44 @@ Partial Class Form1
         Me.Timer1.Enabled = True
         Me.Timer1.Interval = 10000
         '
+        'apklbl
+        '
+        Me.apklbl.AutoSize = True
+        Me.apklbl.Location = New System.Drawing.Point(15, 17)
+        Me.apklbl.Name = "apklbl"
+        Me.apklbl.Size = New System.Drawing.Size(140, 13)
+        Me.apklbl.TabIndex = 7
+        Me.apklbl.Text = "List of Installed Applications:"
+        '
+        'apklistbox
+        '
+        Me.apklistbox.FormattingEnabled = True
+        Me.apklistbox.Location = New System.Drawing.Point(18, 33)
+        Me.apklistbox.Name = "apklistbox"
+        Me.apklistbox.Size = New System.Drawing.Size(222, 186)
+        Me.apklistbox.TabIndex = 8
+        '
+        'apklist
+        '
+        Me.apklist.DataSource = GetType(kinc_first_app.Form1)
+        '
+        'apklistgrp
+        '
+        Me.apklistgrp.Controls.Add(Me.apklbl)
+        Me.apklistgrp.Controls.Add(Me.apklistbox)
+        Me.apklistgrp.Location = New System.Drawing.Point(524, 171)
+        Me.apklistgrp.Name = "apklistgrp"
+        Me.apklistgrp.Size = New System.Drawing.Size(240, 218)
+        Me.apklistgrp.TabIndex = 9
+        Me.apklistgrp.TabStop = False
+        Me.apklistgrp.Visible = False
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(800, 450)
+        Me.Controls.Add(Me.apklistgrp)
         Me.Controls.Add(Me.PictureBox1)
         Me.Controls.Add(Me.Button1)
         Me.Controls.Add(Me.GroupBox1)
@@ -143,6 +182,9 @@ Partial Class Form1
         Me.GroupBox1.PerformLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.BindingSource1, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.apklist, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.apklistgrp.ResumeLayout(False)
+        Me.apklistgrp.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -159,4 +201,8 @@ Partial Class Form1
     Friend WithEvents Button1 As Button
     Friend WithEvents PictureBox1 As PictureBox
     Friend WithEvents Timer1 As Timer
+    Friend WithEvents apklbl As Label
+    Friend WithEvents apklist As BindingSource
+    Friend WithEvents apklistbox As ListBox
+    Friend WithEvents apklistgrp As GroupBox
 End Class

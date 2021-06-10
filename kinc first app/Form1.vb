@@ -47,8 +47,17 @@ Public Class Form1
             .DereferenceLinks = True
             .ShowDialog()
         End With
+        If apkpathdialog.FileNames.Length >= 1 Then
+            apklistgrp.Visible = True
+        End If
         For i As Integer = 0 To apkpathdialog.FileNames.Length - 1
+            Dim qapkpath As String = apkpathdialog.FileNames(i)
+            Dim qapkpatharr() As String
+            qapkpatharr = qapkpath.Split("\")
+
+
             lbl_apkpath.Text = apkpathdialog.FileNames(i)
+            apklistbox.Items.Add(qapkpatharr.LastOrDefault) 'GetValue(qapkpatharr.Last)) 'don't judge me, i was tired and this fix was taking too much time
             Call Apkinstaller(apkpathdialog.FileNames(i))
         Next
         'lbl_apkpath.Text = apkpath
@@ -121,7 +130,18 @@ Public Class Form1
             .Start()
             .WaitForExit()
         End With
-        If waitfordevices.HasExited Then
+        Dim serialreader As New Process
+        With serialreader
+            .StartInfo.UseShellExecute = False
+            .StartInfo.RedirectStandardOutput = True
+            .StartInfo.FileName = Adbpath
+            .StartInfo.Arguments = "devices -l"
+            '.StartInfo.Arguments = "devices"
+            .StartInfo.WindowStyle = 1
+            .Start()
+            .WaitForExit(3000)
+        End With
+        If serialreader.HasExited Then
             Dim strreadr As StringReader = New StringReader(waitfordevices.StandardOutput.ReadToEnd())
             Dim output = strreadr.ReadToEnd
             Return output

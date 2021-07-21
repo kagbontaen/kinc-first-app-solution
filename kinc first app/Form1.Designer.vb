@@ -26,23 +26,26 @@ Partial Class Form1
         Me.btn_apk = New System.Windows.Forms.Button()
         Me.lbl_apkpath = New System.Windows.Forms.Label()
         Me.Adbpathdialog = New System.Windows.Forms.OpenFileDialog()
-        Me.Button2 = New System.Windows.Forms.Button()
+        Me.ADB_btn = New System.Windows.Forms.Button()
         Me.btn_about = New System.Windows.Forms.Button()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.lbl_Adb_version = New System.Windows.Forms.Label()
         Me.lbl_adbpath = New System.Windows.Forms.Label()
         Me.Button1 = New System.Windows.Forms.Button()
-        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
-        Me.BindingSource1 = New System.Windows.Forms.BindingSource(Me.components)
         Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
         Me.apklbl = New System.Windows.Forms.Label()
         Me.apklistbox = New System.Windows.Forms.ListBox()
-        Me.apklist = New System.Windows.Forms.BindingSource(Me.components)
         Me.apklistgrp = New System.Windows.Forms.GroupBox()
+        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+        Me.BindingSource1 = New System.Windows.Forms.BindingSource(Me.components)
+        Me.rerun = New System.Windows.Forms.Button()
+        Me.apkresultbox = New System.Windows.Forms.ListBox()
+        Me.apklist = New System.Windows.Forms.BindingSource(Me.components)
         Me.GroupBox1.SuspendLayout()
+        Me.apklistgrp.SuspendLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.BindingSource1, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.apklist, System.ComponentModel.ISupportInitialize).BeginInit()
-        Me.apklistgrp.SuspendLayout()
         Me.SuspendLayout()
         '
         'btn_apk
@@ -70,14 +73,14 @@ Partial Class Form1
         Me.Adbpathdialog.Filter = "Application|*.exe|All files|*.*"
         Me.Adbpathdialog.Title = "Please Select The Location of ADB.exe"
         '
-        'Button2
+        'ADB_btn
         '
-        Me.Button2.Location = New System.Drawing.Point(6, 32)
-        Me.Button2.Name = "Button2"
-        Me.Button2.Size = New System.Drawing.Size(75, 23)
-        Me.Button2.TabIndex = 1
-        Me.Button2.Text = "Select &ADB"
-        Me.Button2.UseVisualStyleBackColor = True
+        Me.ADB_btn.Location = New System.Drawing.Point(6, 32)
+        Me.ADB_btn.Name = "ADB_btn"
+        Me.ADB_btn.Size = New System.Drawing.Size(75, 23)
+        Me.ADB_btn.TabIndex = 1
+        Me.ADB_btn.Text = "Select &ADB"
+        Me.ADB_btn.UseVisualStyleBackColor = True
         '
         'btn_about
         '
@@ -90,7 +93,8 @@ Partial Class Form1
         '
         'GroupBox1
         '
-        Me.GroupBox1.Controls.Add(Me.Button2)
+        Me.GroupBox1.Controls.Add(Me.lbl_Adb_version)
+        Me.GroupBox1.Controls.Add(Me.ADB_btn)
         Me.GroupBox1.Controls.Add(Me.lbl_adbpath)
         Me.GroupBox1.Location = New System.Drawing.Point(414, 98)
         Me.GroupBox1.Name = "GroupBox1"
@@ -98,6 +102,16 @@ Partial Class Form1
         Me.GroupBox1.TabIndex = 4
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Currently using ADB from"
+        '
+        'lbl_Adb_version
+        '
+        Me.lbl_Adb_version.AutoEllipsis = True
+        Me.lbl_Adb_version.AutoSize = True
+        Me.lbl_Adb_version.Location = New System.Drawing.Point(107, 32)
+        Me.lbl_Adb_version.Name = "lbl_Adb_version"
+        Me.lbl_Adb_version.Size = New System.Drawing.Size(0, 13)
+        Me.lbl_Adb_version.TabIndex = 2
+        Me.lbl_Adb_version.Visible = False
         '
         'lbl_adbpath
         '
@@ -117,20 +131,10 @@ Partial Class Form1
         Me.Button1.Text = "Button1"
         Me.Button1.UseVisualStyleBackColor = True
         '
-        'PictureBox1
-        '
-        Me.PictureBox1.Image = Global.kinc_first_app.My.Resources.Resources.k_logo
-        Me.PictureBox1.Location = New System.Drawing.Point(12, 12)
-        Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(396, 377)
-        Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox1.TabIndex = 6
-        Me.PictureBox1.TabStop = False
-        '
         'Timer1
         '
         Me.Timer1.Enabled = True
-        Me.Timer1.Interval = 10000
+        Me.Timer1.Interval = 5000
         '
         'apklbl
         '
@@ -144,56 +148,86 @@ Partial Class Form1
         'apklistbox
         '
         Me.apklistbox.FormattingEnabled = True
+        Me.apklistbox.HorizontalScrollbar = True
         Me.apklistbox.Location = New System.Drawing.Point(18, 33)
         Me.apklistbox.Name = "apklistbox"
-        Me.apklistbox.Size = New System.Drawing.Size(222, 186)
+        Me.apklistbox.Size = New System.Drawing.Size(172, 342)
         Me.apklistbox.TabIndex = 8
+        '
+        'apklistgrp
+        '
+        Me.apklistgrp.Controls.Add(Me.apkresultbox)
+        Me.apklistgrp.Controls.Add(Me.apklbl)
+        Me.apklistgrp.Controls.Add(Me.apklistbox)
+        Me.apklistgrp.Location = New System.Drawing.Point(12, 12)
+        Me.apklistgrp.Name = "apklistgrp"
+        Me.apklistgrp.Size = New System.Drawing.Size(396, 377)
+        Me.apklistgrp.TabIndex = 9
+        Me.apklistgrp.TabStop = False
+        Me.apklistgrp.Visible = False
+        '
+        'PictureBox1
+        '
+        Me.PictureBox1.Image = Global.kinc_first_app.My.Resources.Resources.k_logo
+        Me.PictureBox1.Location = New System.Drawing.Point(12, 12)
+        Me.PictureBox1.Name = "PictureBox1"
+        Me.PictureBox1.Size = New System.Drawing.Size(396, 377)
+        Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox1.TabIndex = 6
+        Me.PictureBox1.TabStop = False
+        '
+        'rerun
+        '
+        Me.rerun.Location = New System.Drawing.Point(551, 42)
+        Me.rerun.Name = "rerun"
+        Me.rerun.Size = New System.Drawing.Size(93, 36)
+        Me.rerun.TabIndex = 10
+        Me.rerun.Text = "&Rerun"
+        Me.rerun.UseVisualStyleBackColor = True
+        '
+        'apkresultbox
+        '
+        Me.apkresultbox.FormattingEnabled = True
+        Me.apkresultbox.HorizontalScrollbar = True
+        Me.apkresultbox.Location = New System.Drawing.Point(187, 33)
+        Me.apkresultbox.Name = "apkresultbox"
+        Me.apkresultbox.Size = New System.Drawing.Size(203, 342)
+        Me.apkresultbox.TabIndex = 9
+        Me.apkresultbox.Visible = False
         '
         'apklist
         '
         Me.apklist.DataSource = GetType(kinc_first_app.Form1)
-        '
-        'apklistgrp
-        '
-        Me.apklistgrp.Controls.Add(Me.apklbl)
-        Me.apklistgrp.Controls.Add(Me.apklistbox)
-        Me.apklistgrp.Location = New System.Drawing.Point(524, 171)
-        Me.apklistgrp.Name = "apklistgrp"
-        Me.apklistgrp.Size = New System.Drawing.Size(240, 218)
-        Me.apklistgrp.TabIndex = 9
-        Me.apklistgrp.TabStop = False
-        Me.apklistgrp.Visible = False
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(800, 450)
-        Me.Controls.Add(Me.apklistgrp)
+        Me.Controls.Add(Me.rerun)
         Me.Controls.Add(Me.PictureBox1)
         Me.Controls.Add(Me.Button1)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btn_about)
         Me.Controls.Add(Me.lbl_apkpath)
         Me.Controls.Add(Me.btn_apk)
+        Me.Controls.Add(Me.apklistgrp)
         Me.Name = "Form1"
         Me.Text = "Form1"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
+        Me.apklistgrp.ResumeLayout(False)
+        Me.apklistgrp.PerformLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.BindingSource1, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.apklist, System.ComponentModel.ISupportInitialize).EndInit()
-        Me.apklistgrp.ResumeLayout(False)
-        Me.apklistgrp.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
-
-    Friend WithEvents btn_apk As Button
     Friend WithEvents lbl_apkpath As Label
     Friend WithEvents Adbpathdialog As OpenFileDialog
-    Friend WithEvents Button2 As Button
+    Friend WithEvents ADB_btn As Button
     Friend WithEvents btn_about As Button
     Friend WithEvents GroupBox1 As GroupBox
     Friend WithEvents lbl_adbpath As Label
@@ -205,4 +239,8 @@ Partial Class Form1
     Friend WithEvents apklist As BindingSource
     Friend WithEvents apklistbox As ListBox
     Friend WithEvents apklistgrp As GroupBox
+    Public WithEvents btn_apk As Button
+    Public WithEvents rerun As Button
+    Friend WithEvents lbl_Adb_version As Label
+    Friend WithEvents apkresultbox As ListBox
 End Class

@@ -1,7 +1,7 @@
 ﻿Imports System.IO
 Imports Microsoft.Win32
-
-
+Imports Microsoft.VisualBasic.FileIO
+Imports System.Windows.Forms.VisualStyles.VisualStyleElement.Window
 
 Public Class Form1
     Private Const Promptpath As String = "Environment variable 'PATH' does not exist." _
@@ -11,8 +11,10 @@ Public Class Form1
                                          + "please use the choose adb button to select the adb file" _
                                          + vbCrLf _
                                          + "or make sure adb.exe exist in the same directory as this application"
+    Private Const grptxt1 = "Currently Using adb from: "
     Public Adbpath, apkpath, apkpaths() As String
-    Public silent, adbfound As Boolean
+    Public silent = False, adbfound = False
+    Public adb_version As Integer
 
     Public Sub New()
 
@@ -27,7 +29,7 @@ Public Class Form1
     Public Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Call Getlaunchparam()                                 'collecting launch arguments and parameters and determine if running silent
         If silent Then
-            Dispose(disposing:=True)
+            Dispose(True)
             Application.ExitThread()
             Exit Sub
         End If
@@ -35,7 +37,7 @@ Public Class Form1
     End Sub
 
 
-    Private Sub Btn_APK_Click(sender As Object, e As EventArgs) Handles btn_apk.Click
+    Public Sub Btn_APK_Click(sender As Object, e As EventArgs) Handles btn_apk.Click
         Waitfordevice()
         Dim apkpathdialog = New OpenFileDialog
         With apkpathdialog
@@ -50,6 +52,7 @@ Public Class Form1
         If apkpathdialog.FileNames.Length >= 1 Then
             apklistgrp.Visible = True
         End If
+        apkpaths = apkpathdialog.FileNames
         For i As Integer = 0 To apkpathdialog.FileNames.Length - 1
 
 
@@ -62,7 +65,7 @@ Public Class Form1
     End Sub
 
 
-    Private Sub Button2_Click(a As Object, e As EventArgs) Handles Button2.Click
+    Private Sub Button2_Click(a As Object, e As EventArgs) Handles ADB_btn.Click
         Dim adbpathdialog = New OpenFileDialog
         With adbpathdialog
             .Filter = "Application|*.exe|All Files|*.*"
@@ -75,15 +78,24 @@ Public Class Form1
             .DefaultExt = ".exe"
             .ShowDialog()
         End With
-        If Not adbpathdialog.FileName = "" Then
-            Adbpath = adbpathdialog.FileName
-            lbl_adbpath.Text = Adbpath
-            btn_apk.Visible = True
+        If adbpathdialog.FileName = "" Then
+            Return
         End If
+        Adbpath = adbpathdialog.FileName
+        lbl_adbpath.Text = Adbpath
+        btn_apk.Visible = True
+        GroupBox1.Text = grptxt1 + "(Selected binary)"
+        Call Get_adb_version(Adbpath)
+
     End Sub
 
     Public Sub Adbpathdialog_FileOk(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles Adbpathdialog.FileOk
-        Dim adbpath As String = Adbpathdialog.FileName
+        Try
+            Adbpath = Adbpathdialog.FileName
+        Catch
+            MsgBox("cold feet?")
+        End Try
+
     End Sub
 
     Private Sub Btn_about_Click(sender As Object, e As EventArgs) Handles btn_about.Click
@@ -94,101 +106,141 @@ Public Class Form1
     Public Function CheckIfRunning()
         If Process.GetProcessesByName("adb").Count > 0 Then
             GroupBox1.Text = "adb Is already running from"
-            Dim objWMIService = GetObject("winmgmts:\\.\root\cimv2")
-            Dim colProcess As Object = objWMIService.ExecQuery("Select * from win32_Process " & "Where Name = 'adb.exe'")
-            For Each objProcess In colProcess
+            For Each objProcess In GetObject("winmgmts:\\.\root\cimv2").ExecQuery("Select * from win32_Process " & "Where Name = 'adb.exe'")
                 Adbpath = objProcess.ExecutablePath
-                'Dim a As MessageBox
-                'a("adb is currently running and i will" _
-                '       + vbCrLf _
-                '       + "attempt to use the already running one at" _
-                '       + vbCrLf _
-                '       + Adbpath)
-                Call Func_adbfound(Adbpath, True)
+                Call Func_adbfound(Adbpath)
+                GroupBox1.Text = grptxt1 + "(Running)"
                 Return Adbpath
                 Exit Function
             Next
         Else
-            Call Testadbpath()                                              'testing for adb in PATH directories
+            Call Testadbpath()                                              'testing for adb in current and PATH directories
             lbl_apkpath.Text = "adb Is Not running"
         End If
         Return Adbpath
     End Function
 
-    Public Function Waitfordevice()
-        Dim waitfordevices As New Process
-        With waitfordevices
-            .StartInfo.UseShellExecute = False
-            .StartInfo.RedirectStandardOutput = True
-            .StartInfo.FileName = Adbpath
-            .StartInfo.Arguments = "wait-for-any-device"
-            '.StartInfo.Arguments = "devices"
-            .StartInfo.WindowStyle = 1
-            .Start()
-            .WaitForExit()
-        End With
-        Dim serialreader As New Process
-        With serialreader
-            .StartInfo.UseShellExecute = False
-            .StartInfo.RedirectStandardOutput = True
-            .StartInfo.FileName = Adbpath
-            .StartInfo.Arguments = "devices -l"
-            '.StartInfo.Arguments = "devices"
-            .StartInfo.WindowStyle = 1
-            .Start()
-            .WaitForExit(3000)
-        End With
-        If serialreader.HasExited Then
-            Dim strreadr As StringReader = New StringReader(waitfordevices.StandardOutput.ReadToEnd())
-            Dim output = strreadr.ReadToEnd
-            Return output
-            Exit Function
-        End If
-
-        Return waitfordevices.Id
-    End Function
-
     Public Function Testadbpath()
         Try
-            Dim syspath As String = My.Application.GetEnvironmentVariable("PATH")
-
-            For i As Integer = 0 To syspath.Split(";").Length - 1
-                Dim adbtestpath As String = syspath.Split(";")(i)
-                If File.Exists(path:=$"{adbtestpath}\adb.exe") Then
-                    Adbpath = $"{adbtestpath}\adb.exe"
-                    Call Func_adbfound(Adbpath, False)
-                    Exit For
-                End If
-            Next
-        Catch ex As System.ArgumentException
-            Dim msgBoxResult = MessageBox.Show(Promptpath)
-            If File.Exists(CurDir() + "\adb.exe") Then
+            If File.Exists($"{FileSystem.CurrentDirectory}\adb.exe") Then
                 Adbpath = CurDir() _
                             + "\adb.exe"
-                Call Func_adbfound(Adbpath, True)
+                GroupBox1.Text = grptxt1 + "(Current Directory)"
+                Call Func_adbfound(Adbpath)
             Else
-                msgBoxResult = MsgBox("I can't find adb.exe, and i have really searched" _
-                                      + vbCrLf _
-                                      + "please use the select adb button to choose an adb.exe binary", MsgBoxStyle.Critical)
-                btn_apk.Enabled = False
-                Button2.Visible = True
+                Dim syspath As String = My.Application.GetEnvironmentVariable("path")
+                For i As Integer = 0 To syspath.Split(";").Length - 1
+                    Dim adbtestpath As String = syspath.Split(";")(i)
+                    If File.Exists(path:=$"{adbtestpath}\adb.exe") Then
+                        Adbpath = $"{adbtestpath}\adb.exe"
+                        Call Func_adbfound(Adbpath)
+                        GroupBox1.Text = grptxt1 + "(Enviroment Path)"
+                        Exit For
+                    End If
+                Next
+                If Not adbfound Then
+                    Dim MsgBoxResult = MsgBox("I can't find adb.exe, and i have really searched" _
+                                              + vbCrLf _
+                                              + "please use the select adb button to choose an adb.exe binary" _
+                                              + vbCrLf _
+                                              + "to fix this error permanently," _
+                                              + vbCrLf _
+                                              + "copy the android debug bridge binaries" _
+                                              + vbCrLf _
+                                              + "(adb.exe, adbwinapi.dll, adbwinusbapi.dll, e.t.c.)" _
+                                              + vbCrLf _
+                                              + "into the program directory" _
+                                              + vbCrLf _
+                                              + FileSystem.CurrentDirectory, MsgBoxStyle.Critical)
+                    btn_apk.Enabled = False
+                    ADB_btn.Visible = True
+                End If
             End If
+        Catch ex As System.ArgumentException
+            Dim msgBoxResult = MessageBox.Show(Promptpath)
         End Try
         Return Adbpath
     End Function
-    Public Function Func_adbfound(adbpath As String, silent As Boolean)
+    Public Function Func_adbfound(adbpath As String)
+        adbfound = True
         Environment.SetEnvironmentVariable("adbpath", adbpath)               ' might end up using this in the end. but it's useless for now
         lbl_adbpath.Text = adbpath
         If Not silent Then
             MsgBox("adb.exe was found in " + adbpath + vbCrLf + "I will therefore use it",, "Hurray adb.exe has been found")
         End If
-        Button2.Text = "Change ADB"
+        ADB_btn.Text = "Change ADB"
         btn_apk.Enabled = True
+        Call Get_adb_version(adbpath)
         Return adbpath
+    End Function
+    Function Get_adb_version(adbpath) As Integer
+        Dim version As New Process
+        With version
+            .StartInfo.UseShellExecute = False
+            .StartInfo.RedirectStandardOutput = True
+            .StartInfo.FileName = adbpath
+            .StartInfo.Arguments = "version"
+            .StartInfo.CreateNoWindow = True
+            .Start()
+            .WaitForExit()
+        End With
+        Dim adb_full_version = version.StandardOutput.ReadToEnd().Split(vbCrLf)(0).Split(" ").LastOrDefault
+        adb_version = adb_full_version.Split(".").LastOrDefault
+        lbl_Adb_version.Text = $"version: {adb_full_version}"
+        lbl_Adb_version.Visible = True
+        Return adb_version
+    End Function
+
+    Public Function Waitfordevice()
+        My.Forms.Edwindow.ShowDialog()
+        My.Application.SplashScreen.Show()
+
+        With New Process()
+            .StartInfo.UseShellExecute = False
+            .StartInfo.RedirectStandardOutput = True
+            .StartInfo.FileName = Adbpath
+            .StartInfo.Arguments = "wait-for-any-device"
+            '.StartInfo.Arguments = "devices"
+            .StartInfo.WindowStyle = ProcessWindowStyle.Hidden
+            .StartInfo.CreateNoWindow = True
+            .Start()
+            .WaitForExit()
+        End With
+        Using serialreader As New Process
+            With serialreader
+                .StartInfo.UseShellExecute = False
+                .StartInfo.RedirectStandardOutput = True
+                .StartInfo.FileName = Adbpath
+                .StartInfo.Arguments = "devices -l"
+                '.StartInfo.Arguments = "devices"
+                .StartInfo.WindowStyle = ProcessWindowStyle.Hidden
+                .StartInfo.CreateNoWindow = True
+                .Start()
+                .WaitForExit(3000)
+            End With
+            If serialreader.HasExited Then
+                Dim strreadr As StringReader = serialreader.StandardOutput.ReadToEnd
+                Dim output = strreadr.ReadToEnd
+                Return output
+                Exit Function
+            End If
+        End Using
+
+
+        Return New Process().Id
     End Function
 
     Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
-        PictureBox1.Hide()
+        PictureBox1.Dispose()
+    End Sub
+
+    Public Sub Rerun_Click(sender As Object, e As EventArgs) Handles rerun.Click
+
+        For i As Integer = 0 To apkpaths.Length - 1
+            lbl_apkpath.Text = apkpaths(i)
+            apklistbox.Items.Add(apkpaths(i).Split("\").LastOrDefault) 'GetValue(qapkpatharr.Last)) 'don't judge me, i was tired and this fix was taking too much time
+            Call Apkinstaller(apkpaths(i))
+        Next
     End Sub
 
     Public Function Getlaunchparam()
@@ -207,7 +259,7 @@ Public Class Form1
                     apkpath = Environment.GetCommandLineArgs()(i)
                     Call Apkinstaller(apkpath)
                 Next
-                Return apkpath & " has been installed"
+                Return $"{apkpath} has been installed"
                 Close()
                 'Me.Dispose()
 
@@ -219,6 +271,11 @@ Er:
         Return "9999"
     End Function
 
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <param name="apkpath"></param>
+    ''' <returns></returns>
     Public Function Apkinstaller(apkpath As String)
         If Not silent Then
             MsgBox("Installing " + apkpath + " to Device")
@@ -228,24 +285,40 @@ Er:
             .StartInfo.UseShellExecute = False
             .StartInfo.RedirectStandardOutput = True
             .StartInfo.FileName = Adbpath
-            .StartInfo.Arguments = "install -r " + """" + apkpath + """"
+            .StartInfo.Arguments = $"install -r ""{apkpath}"""
             .StartInfo.WindowStyle = 1
             .Start()
             '.WaitForExit()
         End With
-        'apkinstall.StartInfo.EnvironmentVariables = "@echo on"
-
         Dim ed As String = apkinstall.StandardOutput.ReadToEnd.ToString()
-        'Dim tmp As New StreamWriter               'looking for a cmd-like output for the program
+        If silent Then
+            MsgBox(ed)                                              'remove when done or make part of program
+        Else
+            Dim edarr() As String = ed.Split(vbCrLf)
+            If apkresultbox.Visible = False Then
+                apkresultbox.Visible = True
+            End If
+            Select Case edarr.Length
+                Case 2
+                    apkresultbox.Items.Add(edarr(0))
+                Case < 5
+                    apkresultbox.Items.Add(edarr.GetValue(edarr.Length - 2))
+                Case >= 5
+                    apkresultbox.Items.Add(edarr(1))
+                    apkresultbox.Items.Add(edarr(2))
+                    apkresultbox.Items.Add(edarr.GetValue(edarr.Length - 3))
+                    apkresultbox.Items.Add(edarr.GetValue(edarr.Length - 2))
+                    apkresultbox.Items.Add(edarr.GetValue(edarr.Length - 1))
+            End Select
+            Dim counting As Timer = Timer1
+            With counting
+                .Interval = 5000
+                .Start()
+            End With
 
-        'Dim output As StringReader = New StringReader(apkinstall.StandardOutput.ReadToEnd())
+        End If
 
-        'Dim unused = output.ReadLine
-        MsgBox(ed)                                              'remove when done or make part of program
-        Return ed
-
-        '        Return adbdev
-
+            Return ed
     End Function
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click

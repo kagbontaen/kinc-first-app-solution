@@ -324,10 +324,10 @@ Er:
             End If
             Select Case edarr.Length
                 Case 0
-                    apkresultbox.Items.Add("error checking install status")
+                    apkresultbox.Items.Add("error: confirm from device")
                 Case 2
                     apkresultbox.Items.Add(edarr(0))
-                Case Else
+                Case > 2
                     apkresultbox.Items.Add(edarr.GetValue(edarr.Length - 2))
             End Select
         End If

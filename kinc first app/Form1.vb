@@ -38,66 +38,9 @@ Public Class Form1
     End Sub
 
 
-    Public Sub Btn_APK_Click(sender As Object, e As EventArgs) Handles btn_apk.Click
-        Waitfordevice()
-        Dim apkpathdialog = New OpenFileDialog
-        With apkpathdialog
-            .Filter = "Android Application|*.apk|All Files|*.*"
-            .Title = "Select Location of Adb Binary"
-            .InitialDirectory = "c:\kk\apk"                    ', set this way for testing, change to this when done, .InitialDirectory = CurDir()
-            .RestoreDirectory = True
-            .Multiselect = True
-            .DereferenceLinks = True
-            .ShowDialog()
-        End With
-        If apkpathdialog.FileNames.Length >= 1 Then
-            apklistgrp.Visible = True
-        End If
-        apkpaths = apkpathdialog.FileNames
-        For i As Integer = 0 To apkpathdialog.FileNames.Length - 1
 
 
-            lbl_apkpath.Text = apkpathdialog.FileNames(i)
-            apklistbox.Items.Add(apkpathdialog.FileNames(i).Split("\").LastOrDefault) 'GetValue(qapkpatharr.Last)) 'don't judge me, i was tired and this fix was taking too much time
-            Call Apkinstaller(apkpathdialog.FileNames(i))
-        Next
-        'lbl_apkpath.Text = apkpath
-        'Call Apkinstaller(apkpath)
-    End Sub
 
-
-    Private Sub Button2_Click(a As Object, e As EventArgs) Handles ADB_btn.Click
-        Dim adbpathdialog = New OpenFileDialog
-        With adbpathdialog
-            .Filter = "Application|*.exe|All Files|*.*"
-            .Title = "Select Location of Adb Binary"
-            .InitialDirectory = CurDir()
-            .RestoreDirectory = True
-            .Multiselect = False
-            .ValidateNames = True
-            .CheckFileExists = True
-            .DefaultExt = ".exe"
-            .ShowDialog()
-        End With
-        If adbpathdialog.FileName = "" Then
-            Return
-        End If
-        Adbpath = adbpathdialog.FileName
-        lbl_adbpath.Text = Adbpath
-        btn_apk.Visible = True
-        GroupBox1.Text = grptxt1 + "(Selected binary)"
-        Call Get_adb_version(Adbpath)
-
-    End Sub
-
-    Public Sub Adbpathdialog_FileOk(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles Adbpathdialog.FileOk
-        Try
-            Adbpath = Adbpathdialog.FileName
-        Catch
-            MsgBox("cold feet?")
-        End Try
-
-    End Sub
 
     Private Sub Btn_about_Click(sender As Object, e As EventArgs) Handles btn_about.Click
         Me.Hide()
@@ -120,7 +63,38 @@ Public Class Form1
         End If
         Return Adbpath
     End Function
+    Public Function Getlaunchparam()
+        If Environment.GetEnvironmentVariable("darkmode") = "dark" Then
+            BackColor = Color.Black
+            ForeColor = Color.White
+            darkcheck.CheckState = CheckState.Checked
+        End If
+        On Error GoTo Er
+        Select Case Environment.GetCommandLineArgs().Length
+            Case Is <= 1
+                silent = False
+                'MsgBox(startargs(0))
+                'Call Apkinstaller(startargs(0))
+                Exit Function
+            Case Else
+                silent = True
+                Call CheckIfRunning()
+                Call Waitfordevice()
+                For i As Integer = 1 To Environment.GetCommandLineArgs().Length - 1
+                    apkpath = Environment.GetCommandLineArgs()(i)
+                    Call Apkinstaller(apkpath)
+                Next
+                Return apkpath & " has been installed"
+                Close()
+                'Me.Dispose()
 
+        End Select
+Er:
+        Dim msgBoxEr = MsgBox("an error occurred whle getting program launch parameters",
+               MsgBoxStyle.Critical,
+               "Something is wrong in the force")
+        Return "9999"
+    End Function
     Public Function Testadbpath()
         Try
             If File.Exists($"{FileSystem.CurrentDirectory}\adb.exe") Then
@@ -174,6 +148,7 @@ Public Class Form1
         Call Get_adb_version(adbpath)
         Return adbpath
     End Function
+
     Function Get_adb_version(adbpath) As Integer
         Dim version As New Process
         With version
@@ -191,6 +166,97 @@ Public Class Form1
         lbl_Adb_version.Visible = True
         Return adb_version
     End Function
+
+
+    Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+        PictureBox1.Dispose()
+    End Sub
+
+    Public Sub Rerun_Click(sender As Object, e As EventArgs) Handles rerun.Click
+
+        For i As Integer = 0 To apkpaths.Length - 1
+            lbl_apkpath.Text = apkpaths(i)
+            apklistbox.Items.Add(apkpaths(i).Split("\").LastOrDefault) 'GetValue(qapkpatharr.Last)) 'don't judge me, i was tired and this fix was taking too much time
+            Call Apkinstaller(apkpaths(i))
+        Next
+    End Sub
+
+    Private Sub darkcheck_CheckedChanged(sender As Object, e As EventArgs) Handles darkcheck.CheckedChanged
+        If darkcheck.Checked Then
+            Environment.SetEnvironmentVariable("darkmode", "dark", EnvironmentVariableTarget.User)
+        Else
+            Environment.SetEnvironmentVariable("darkmode", "light", EnvironmentVariableTarget.User)
+        End If
+
+        If Environment.GetEnvironmentVariable("darkmode", EnvironmentVariableTarget.User) = "dark" Then
+            BackColor = Color.Black
+            ForeColor = Color.White
+        ElseIf Environment.GetEnvironmentVariable("darkmode", EnvironmentVariableTarget.User) = "light" Then
+            BackColor = Color.White
+            ForeColor = Color.Black
+        End If
+    End Sub
+
+    Private Sub Button2_Click(a As Object, e As EventArgs) Handles ADB_btn.Click
+        Dim adbpathdialog = New OpenFileDialog
+        With adbpathdialog
+            .Filter = "Application|*.exe|All Files|*.*"
+            .Title = "Select Location of Adb Binary"
+            .InitialDirectory = CurDir()
+            .RestoreDirectory = True
+            .Multiselect = False
+            .ValidateNames = True
+            .CheckFileExists = True
+            .DefaultExt = ".exe"
+            .ShowDialog()
+        End With
+        If adbpathdialog.FileName = "" Then
+            Return
+        End If
+        Adbpath = adbpathdialog.FileName
+        lbl_adbpath.Text = Adbpath
+        btn_apk.Visible = True
+        GroupBox1.Text = grptxt1 + "(Selected binary)"
+        Call Get_adb_version(Adbpath)
+
+    End Sub
+
+    Public Sub Adbpathdialog_FileOk(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles Adbpathdialog.FileOk
+        Try
+            Adbpath = Adbpathdialog.FileName
+        Catch
+            MsgBox("cold feet?")
+        End Try
+
+    End Sub
+
+    Public Sub Btn_APK_Click(sender As Object, e As EventArgs) Handles btn_apk.Click
+        Waitfordevice()
+        Dim apkpathdialog = New OpenFileDialog
+        With apkpathdialog
+            .Filter = "Android Application|*.apk|All Files|*.*"
+            .Title = "Select Location of Adb Binary"
+            .InitialDirectory = "c:\kk\apk"                    ', set this way for testing, change to this when done, .InitialDirectory = CurDir()
+            .RestoreDirectory = True
+            .Multiselect = True
+            .DereferenceLinks = True
+            .ShowDialog()
+        End With
+        If apkpathdialog.FileNames.Length >= 1 Then
+            apklistgrp.Visible = True
+        End If
+        apkpaths = apkpathdialog.FileNames
+        For i As Integer = 0 To apkpathdialog.FileNames.Length - 1
+
+
+            lbl_apkpath.Text = apkpathdialog.FileNames(i)
+            apklistbox.Items.Add(apkpathdialog.FileNames(i).Split("\").LastOrDefault) 'GetValue(qapkpatharr.Last)) 'don't judge me, i was tired and this fix was taking too much time
+            Call Apkinstaller(apkpathdialog.FileNames(i))
+        Next
+        'lbl_apkpath.Text = apkpath
+        'Call Apkinstaller(apkpath)
+    End Sub
+
 
     Public Function Waitfordevice()
         Dim waitfordevices As New Process
@@ -225,48 +291,6 @@ Public Class Form1
 
         Return waitfordevices.Id
     End Function
-
-    Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
-        PictureBox1.Dispose()
-    End Sub
-
-    Public Sub Rerun_Click(sender As Object, e As EventArgs) Handles rerun.Click
-
-        For i As Integer = 0 To apkpaths.Length - 1
-            lbl_apkpath.Text = apkpaths(i)
-            apklistbox.Items.Add(apkpaths(i).Split("\").LastOrDefault) 'GetValue(qapkpatharr.Last)) 'don't judge me, i was tired and this fix was taking too much time
-            Call Apkinstaller(apkpaths(i))
-        Next
-    End Sub
-
-    Public Function Getlaunchparam()
-        On Error GoTo Er
-        Select Case Environment.GetCommandLineArgs().Length
-            Case Is <= 1
-                silent = False
-                'MsgBox(startargs(0))
-                'Call Apkinstaller(startargs(0))
-                Exit Function
-            Case Else
-                silent = True
-                Call CheckIfRunning()
-                Call Waitfordevice()
-                For i As Integer = 1 To Environment.GetCommandLineArgs().Length - 1
-                    apkpath = Environment.GetCommandLineArgs()(i)
-                    Call Apkinstaller(apkpath)
-                Next
-                Return apkpath & " has been installed"
-                Close()
-                'Me.Dispose()
-
-        End Select
-Er:
-        Dim msgBoxEr = MsgBox("an error occurred whle getting program launch parameters",
-               MsgBoxStyle.Critical,
-               "Something is wrong in the force")
-        Return "9999"
-    End Function
-
     ''' <summary>
     ''' 
     ''' </summary>
@@ -279,7 +303,11 @@ Er:
         Dim apkinstall As New Process
         With apkinstall
             .StartInfo.UseShellExecute = False
-            .StartInfo.RedirectStandardOutput = True
+            If silent Then
+                .StartInfo.RedirectStandardOutput = False
+            Else
+                .StartInfo.RedirectStandardOutput = True
+            End If
             .StartInfo.FileName = Adbpath
             .StartInfo.Arguments = "install -r " + """" + apkpath + """"
             .StartInfo.WindowStyle = 1
@@ -295,6 +323,8 @@ Er:
                 apkresultbox.Visible = True
             End If
             Select Case edarr.Length
+                Case 0
+                    apkresultbox.Items.Add("error checking install status")
                 Case 2
                     apkresultbox.Items.Add(edarr(0))
                 Case Else

@@ -1,8 +1,37 @@
 ﻿Imports System.IO
 Imports Microsoft.Win32
 Imports Microsoft.VisualBasic.FileIO
+Imports System.Threading
 
+Module FormUtils
+    Public sAutoClosed As Boolean
 
+    Public Sub CloseMsgBoxDelay(ByVal data As Object)
+        System.Threading.Thread.Sleep(CInt(data))
+        SendKeys.SendWait("~")
+        sAutoClosed = True
+    End Sub
+
+    Public Function MsgBoxDelayClose(prompt As Object, ByVal delay As Integer, Optional delayedResult As MsgBoxResult = MsgBoxResult.Ok, Optional buttons As MsgBoxStyle = MsgBoxStyle.ApplicationModal, Optional title As Object = Nothing) As MsgBoxResult
+        Dim t As Thread
+
+        If delay > 0 Then
+            sAutoClosed = False
+            t = New Thread(AddressOf CloseMsgBoxDelay)
+            t.Start(delay)
+
+            MsgBoxDelayClose = MsgBox(prompt, buttons, title)
+            If sAutoClosed Then
+                MsgBoxDelayClose = delayedResult
+            Else
+                t.Abort()
+            End If
+        Else
+            MsgBoxDelayClose = MsgBox(prompt, buttons, title)
+        End If
+
+    End Function
+End Module
 
 Public Class Form1
     Private Const Promptpath As String = "Environment variable 'PATH' does not exist." _
@@ -25,7 +54,10 @@ Public Class Form1
 
     End Sub
 
-
+    Public Function msbox(data As String, Optional timeout As Integer = 5, Optional title As String = "Message box")
+        CreateObject("WScript.Shell").Popup(data, timeout, title)
+        Return "done"
+    End Function
 
     Public Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Call Getlaunchparam()                                 'collecting launch arguments and parameters and determine if running silent
@@ -141,7 +173,7 @@ Er:
         Environment.SetEnvironmentVariable("adbpath", adbpath)               ' might end up using this in the end. but it's useless for now
         lbl_adbpath.Text = adbpath
         If Not silent Then
-            MsgBox("adb.exe was found in " + adbpath + vbCrLf + "I will therefore use it",, "Hurray adb.exe has been found")
+            msbox("adb.exe was found in " + adbpath + vbCrLf + "I will therefore use it", 4, "Hurray adb.exe has been found")
         End If
         ADB_btn.Text = "Change ADB"
         btn_apk.Enabled = True
@@ -298,7 +330,7 @@ Er:
     ''' <returns></returns>
     Public Function Apkinstaller(apkpath As String)
         If Not silent Then
-            MsgBox("Installing " + apkpath + " to Device")
+            msbox("Installing " + apkpath + " to Device", 5, "Installing")
         End If
         Dim apkinstall As New Process
         With apkinstall
@@ -316,7 +348,7 @@ Er:
         End With
         Dim ed As String = apkinstall.StandardOutput.ReadToEnd.ToString()
         If silent Then
-            MsgBox(ed)                                              'remove when done or make part of program
+            msbox(ed)                                              'remove when done or make part of program
         Else
             Dim edarr() As String = ed.Split(vbCrLf)
             If apkresultbox.Visible = False Then
@@ -335,8 +367,9 @@ Er:
     End Function
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        Me.Hide()
-        Explorer1.Show()
+        FormUtils.MsgBoxDelayClose(Adbpath, 5, MsgBoxResult.Cancel, MsgBoxStyle.Critical, adb_version)
+        'Me.Hide()
+        'Explorer1.Show()
     End Sub
 End Class
 

@@ -36,11 +36,12 @@ Partial Class Form1
         Me.apklbl = New System.Windows.Forms.Label()
         Me.apklistbox = New System.Windows.Forms.ListBox()
         Me.apklistgrp = New System.Windows.Forms.GroupBox()
+        Me.apkresultbox = New System.Windows.Forms.ListBox()
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.BindingSource1 = New System.Windows.Forms.BindingSource(Me.components)
         Me.rerun = New System.Windows.Forms.Button()
-        Me.apkresultbox = New System.Windows.Forms.ListBox()
         Me.apklist = New System.Windows.Forms.BindingSource(Me.components)
+        Me.darkcheck = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         Me.apklistgrp.SuspendLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -166,6 +167,16 @@ Partial Class Form1
         Me.apklistgrp.TabStop = False
         Me.apklistgrp.Visible = False
         '
+        'apkresultbox
+        '
+        Me.apkresultbox.FormattingEnabled = True
+        Me.apkresultbox.HorizontalScrollbar = True
+        Me.apkresultbox.Location = New System.Drawing.Point(187, 33)
+        Me.apkresultbox.Name = "apkresultbox"
+        Me.apkresultbox.Size = New System.Drawing.Size(203, 342)
+        Me.apkresultbox.TabIndex = 9
+        Me.apkresultbox.Visible = False
+        '
         'PictureBox1
         '
         Me.PictureBox1.Image = Global.kinc_first_app.My.Resources.Resources.k_logo
@@ -185,25 +196,26 @@ Partial Class Form1
         Me.rerun.Text = "&Rerun"
         Me.rerun.UseVisualStyleBackColor = True
         '
-        'apkresultbox
-        '
-        Me.apkresultbox.FormattingEnabled = True
-        Me.apkresultbox.HorizontalScrollbar = True
-        Me.apkresultbox.Location = New System.Drawing.Point(187, 33)
-        Me.apkresultbox.Name = "apkresultbox"
-        Me.apkresultbox.Size = New System.Drawing.Size(203, 342)
-        Me.apkresultbox.TabIndex = 9
-        Me.apkresultbox.Visible = False
-        '
         'apklist
         '
         Me.apklist.DataSource = GetType(kinc_first_app.Form1)
+        '
+        'darkcheck
+        '
+        Me.darkcheck.AutoSize = True
+        Me.darkcheck.Location = New System.Drawing.Point(666, 409)
+        Me.darkcheck.Name = "darkcheck"
+        Me.darkcheck.Size = New System.Drawing.Size(75, 17)
+        Me.darkcheck.TabIndex = 11
+        Me.darkcheck.Text = "&Darkmode"
+        Me.darkcheck.UseVisualStyleBackColor = True
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(800, 450)
+        Me.Controls.Add(Me.darkcheck)
         Me.Controls.Add(Me.rerun)
         Me.Controls.Add(Me.PictureBox1)
         Me.Controls.Add(Me.Button1)
@@ -212,6 +224,7 @@ Partial Class Form1
         Me.Controls.Add(Me.lbl_apkpath)
         Me.Controls.Add(Me.btn_apk)
         Me.Controls.Add(Me.apklistgrp)
+        Me.ForeColor = System.Drawing.Color.Black
         Me.Name = "Form1"
         Me.Text = "Form1"
         Me.GroupBox1.ResumeLayout(False)
@@ -243,4 +256,5 @@ Partial Class Form1
     Public WithEvents rerun As Button
     Friend WithEvents lbl_Adb_version As Label
     Friend WithEvents apkresultbox As ListBox
+    Friend WithEvents darkcheck As CheckBox
 End Class

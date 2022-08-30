@@ -1,7 +1,37 @@
 ﻿Imports System.IO
 Imports Microsoft.Win32
 Imports Microsoft.VisualBasic.FileIO
-Imports System.Windows.Forms.VisualStyles.VisualStyleElement.Window
+Imports System.Threading
+
+Module FormUtils
+    Public sAutoClosed As Boolean
+
+    Public Sub CloseMsgBoxDelay(ByVal data As Object)
+        System.Threading.Thread.Sleep(CInt(data))
+        SendKeys.SendWait("~")
+        sAutoClosed = True
+    End Sub
+
+    Public Function MsgBoxDelayClose(prompt As Object, ByVal delay As Integer, Optional delayedResult As MsgBoxResult = MsgBoxResult.Ok, Optional buttons As MsgBoxStyle = MsgBoxStyle.ApplicationModal, Optional title As Object = Nothing) As MsgBoxResult
+        Dim t As Thread
+
+        If delay > 0 Then
+            sAutoClosed = False
+            t = New Thread(AddressOf CloseMsgBoxDelay)
+            t.Start(delay)
+
+            MsgBoxDelayClose = MsgBox(prompt, buttons, title)
+            If sAutoClosed Then
+                MsgBoxDelayClose = delayedResult
+            Else
+                t.Abort()
+            End If
+        Else
+            MsgBoxDelayClose = MsgBox(prompt, buttons, title)
+        End If
+
+    End Function
+End Module
 
 Public Class Form1
     Private Const Promptpath As String = "Environment variable 'PATH' does not exist." _
@@ -24,7 +54,10 @@ Public Class Form1
 
     End Sub
 
-
+    Public Function msbox(data As String, Optional timeout As Integer = 5, Optional title As String = "Message box")
+        CreateObject("WScript.Shell").Popup(data, timeout, title)
+        Return "done"
+    End Function
 
     Public Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Call Getlaunchparam()                                 'collecting launch arguments and parameters and determine if running silent
@@ -37,66 +70,9 @@ Public Class Form1
     End Sub
 
 
-    Public Sub Btn_APK_Click(sender As Object, e As EventArgs) Handles btn_apk.Click
-        Waitfordevice()
-        Dim apkpathdialog = New OpenFileDialog
-        With apkpathdialog
-            .Filter = "Android Application|*.apk|All Files|*.*"
-            .Title = "Select Location of Adb Binary"
-            .InitialDirectory = "c:\kk\apk"                    ', set this way for testing, change to this when done, .InitialDirectory = CurDir()
-            .RestoreDirectory = True
-            .Multiselect = True
-            .DereferenceLinks = True
-            .ShowDialog()
-        End With
-        If apkpathdialog.FileNames.Length >= 1 Then
-            apklistgrp.Visible = True
-        End If
-        apkpaths = apkpathdialog.FileNames
-        For i As Integer = 0 To apkpathdialog.FileNames.Length - 1
 
 
-            lbl_apkpath.Text = apkpathdialog.FileNames(i)
-            apklistbox.Items.Add(apkpathdialog.FileNames(i).Split("\").LastOrDefault) 'GetValue(qapkpatharr.Last)) 'don't judge me, i was tired and this fix was taking too much time
-            Call Apkinstaller(apkpathdialog.FileNames(i))
-        Next
-        'lbl_apkpath.Text = apkpath
-        'Call Apkinstaller(apkpath)
-    End Sub
 
-
-    Private Sub Button2_Click(a As Object, e As EventArgs) Handles ADB_btn.Click
-        Dim adbpathdialog = New OpenFileDialog
-        With adbpathdialog
-            .Filter = "Application|*.exe|All Files|*.*"
-            .Title = "Select Location of Adb Binary"
-            .InitialDirectory = CurDir()
-            .RestoreDirectory = True
-            .Multiselect = False
-            .ValidateNames = True
-            .CheckFileExists = True
-            .DefaultExt = ".exe"
-            .ShowDialog()
-        End With
-        If adbpathdialog.FileName = "" Then
-            Return
-        End If
-        Adbpath = adbpathdialog.FileName
-        lbl_adbpath.Text = Adbpath
-        btn_apk.Visible = True
-        GroupBox1.Text = grptxt1 + "(Selected binary)"
-        Call Get_adb_version(Adbpath)
-
-    End Sub
-
-    Public Sub Adbpathdialog_FileOk(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles Adbpathdialog.FileOk
-        Try
-            Adbpath = Adbpathdialog.FileName
-        Catch
-            MsgBox("cold feet?")
-        End Try
-
-    End Sub
 
     Private Sub Btn_about_Click(sender As Object, e As EventArgs) Handles btn_about.Click
         Me.Hide()
@@ -119,7 +95,38 @@ Public Class Form1
         End If
         Return Adbpath
     End Function
+    Public Function Getlaunchparam()
+        If Environment.GetEnvironmentVariable("darkmode") = "dark" Then
+            BackColor = Color.Black
+            ForeColor = Color.White
+            darkcheck.CheckState = CheckState.Checked
+        End If
+        On Error GoTo Er
+        Select Case Environment.GetCommandLineArgs().Length
+            Case Is <= 1
+                silent = False
+                'MsgBox(startargs(0))
+                'Call Apkinstaller(startargs(0))
+                Exit Function
+            Case Else
+                silent = True
+                Call CheckIfRunning()
+                Call Waitfordevice()
+                For i As Integer = 1 To Environment.GetCommandLineArgs().Length - 1
+                    apkpath = Environment.GetCommandLineArgs()(i)
+                    Call Apkinstaller(apkpath)
+                Next
+                Return apkpath & " has been installed"
+                Close()
+                'Me.Dispose()
 
+        End Select
+Er:
+        Dim msgBoxEr = MsgBox("an error occurred whle getting program launch parameters",
+               MsgBoxStyle.Critical,
+               "Something is wrong in the force")
+        Return "9999"
+    End Function
     Public Function Testadbpath()
         Try
             If File.Exists($"{FileSystem.CurrentDirectory}\adb.exe") Then
@@ -166,13 +173,14 @@ Public Class Form1
         Environment.SetEnvironmentVariable("adbpath", adbpath)               ' might end up using this in the end. but it's useless for now
         lbl_adbpath.Text = adbpath
         If Not silent Then
-            MsgBox("adb.exe was found in " + adbpath + vbCrLf + "I will therefore use it",, "Hurray adb.exe has been found")
+            msbox("adb.exe was found in " + adbpath + vbCrLf + "I will therefore use it", 4, "Hurray adb.exe has been found")
         End If
         ADB_btn.Text = "Change ADB"
         btn_apk.Enabled = True
         Call Get_adb_version(adbpath)
         Return adbpath
     End Function
+
     Function Get_adb_version(adbpath) As Integer
         Dim version As New Process
         With version
@@ -191,44 +199,6 @@ Public Class Form1
         Return adb_version
     End Function
 
-    Public Function Waitfordevice()
-        My.Forms.Edwindow.ShowDialog()
-        My.Application.SplashScreen.Show()
-
-        With New Process()
-            .StartInfo.UseShellExecute = False
-            .StartInfo.RedirectStandardOutput = True
-            .StartInfo.FileName = Adbpath
-            .StartInfo.Arguments = "wait-for-any-device"
-            '.StartInfo.Arguments = "devices"
-            .StartInfo.WindowStyle = ProcessWindowStyle.Hidden
-            .StartInfo.CreateNoWindow = True
-            .Start()
-            .WaitForExit()
-        End With
-        Using serialreader As New Process
-            With serialreader
-                .StartInfo.UseShellExecute = False
-                .StartInfo.RedirectStandardOutput = True
-                .StartInfo.FileName = Adbpath
-                .StartInfo.Arguments = "devices -l"
-                '.StartInfo.Arguments = "devices"
-                .StartInfo.WindowStyle = ProcessWindowStyle.Hidden
-                .StartInfo.CreateNoWindow = True
-                .Start()
-                .WaitForExit(3000)
-            End With
-            If serialreader.HasExited Then
-                Dim strreadr As StringReader = serialreader.StandardOutput.ReadToEnd
-                Dim output = strreadr.ReadToEnd
-                Return output
-                Exit Function
-            End If
-        End Using
-
-
-        Return New Process().Id
-    End Function
 
     Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
         PictureBox1.Dispose()
@@ -243,34 +213,115 @@ Public Class Form1
         Next
     End Sub
 
-    Public Function Getlaunchparam()
-        On Error GoTo Er
-        Select Case Environment.GetCommandLineArgs().Length
-            Case Is <= 1
-                silent = False
-                'MsgBox(startargs(0))
-                'Call Apkinstaller(startargs(0))
+    Private Sub darkcheck_CheckedChanged(sender As Object, e As EventArgs) Handles darkcheck.CheckedChanged
+        If darkcheck.Checked Then
+            Environment.SetEnvironmentVariable("darkmode", "dark", EnvironmentVariableTarget.User)
+        Else
+            Environment.SetEnvironmentVariable("darkmode", "light", EnvironmentVariableTarget.User)
+        End If
+
+        If Environment.GetEnvironmentVariable("darkmode", EnvironmentVariableTarget.User) = "dark" Then
+            BackColor = Color.Black
+            ForeColor = Color.White
+        ElseIf Environment.GetEnvironmentVariable("darkmode", EnvironmentVariableTarget.User) = "light" Then
+            BackColor = Color.White
+            ForeColor = Color.Black
+        End If
+    End Sub
+
+    Private Sub Button2_Click(a As Object, e As EventArgs) Handles ADB_btn.Click
+        Dim adbpathdialog = New OpenFileDialog
+        With adbpathdialog
+            .Filter = "Application|*.exe|All Files|*.*"
+            .Title = "Select Location of Adb Binary"
+            .InitialDirectory = CurDir()
+            .RestoreDirectory = True
+            .Multiselect = False
+            .ValidateNames = True
+            .CheckFileExists = True
+            .DefaultExt = ".exe"
+            .ShowDialog()
+        End With
+        If adbpathdialog.FileName = "" Then
+            Return
+        End If
+        Adbpath = adbpathdialog.FileName
+        lbl_adbpath.Text = Adbpath
+        btn_apk.Visible = True
+        GroupBox1.Text = grptxt1 + "(Selected binary)"
+        Call Get_adb_version(Adbpath)
+
+    End Sub
+
+    Public Sub Adbpathdialog_FileOk(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles Adbpathdialog.FileOk
+        Try
+            Adbpath = Adbpathdialog.FileName
+        Catch
+            MsgBox("cold feet?")
+        End Try
+
+    End Sub
+
+    Public Sub Btn_APK_Click(sender As Object, e As EventArgs) Handles btn_apk.Click
+        Waitfordevice()
+        Dim apkpathdialog = New OpenFileDialog
+        With apkpathdialog
+            .Filter = "Android Application|*.apk|All Files|*.*"
+            .Title = "Select Location of Adb Binary"
+            .InitialDirectory = "c:\kk\apk"                    ', set this way for testing, change to this when done, .InitialDirectory = CurDir()
+            .RestoreDirectory = True
+            .Multiselect = True
+            .DereferenceLinks = True
+            .ShowDialog()
+        End With
+        If apkpathdialog.FileNames.Length >= 1 Then
+            apklistgrp.Visible = True
+        End If
+        apkpaths = apkpathdialog.FileNames
+        For i As Integer = 0 To apkpathdialog.FileNames.Length - 1
+
+
+            lbl_apkpath.Text = apkpathdialog.FileNames(i)
+            apklistbox.Items.Add(apkpathdialog.FileNames(i).Split("\").LastOrDefault) 'GetValue(qapkpatharr.Last)) 'don't judge me, i was tired and this fix was taking too much time
+            Call Apkinstaller(apkpathdialog.FileNames(i))
+        Next
+        'lbl_apkpath.Text = apkpath
+        'Call Apkinstaller(apkpath)
+    End Sub
+
+
+    Public Function Waitfordevice()
+        Dim waitfordevices As New Process
+        With waitfordevices
+            .StartInfo.UseShellExecute = False
+            .StartInfo.RedirectStandardOutput = True
+            .StartInfo.FileName = Adbpath
+            .StartInfo.Arguments = "wait-for-any-device"
+            '.StartInfo.Arguments = "devices"
+            .StartInfo.WindowStyle = ProcessWindowStyle.Hidden
+            .Start()
+            .WaitForExit()
+        End With
+        Using serialreader As New Process
+            With serialreader
+                .StartInfo.UseShellExecute = False
+                .StartInfo.RedirectStandardOutput = True
+                .StartInfo.FileName = Adbpath
+                .StartInfo.Arguments = "devices -l"
+                '.StartInfo.Arguments = "devices"
+                .StartInfo.WindowStyle = ProcessWindowStyle.Hidden
+                .Start()
+                .WaitForExit(3000)
+            End With
+            If serialreader.HasExited Then
+                Dim strreadr As StringReader = New StringReader(waitfordevices.StandardOutput.ReadToEnd())
+                Dim output = strreadr.ReadToEnd
+                Return output
                 Exit Function
-            Case Else
-                silent = True
-                Call CheckIfRunning()
-                Call Waitfordevice()
-                For i As Integer = 1 To Environment.GetCommandLineArgs().Length - 1
-                    apkpath = Environment.GetCommandLineArgs()(i)
-                    Call Apkinstaller(apkpath)
-                Next
-                Return $"{apkpath} has been installed"
-                Close()
-                'Me.Dispose()
+            End If
+        End Using
 
-        End Select
-Er:
-        Dim msgBoxEr = MsgBox("an error occurred whle getting program launch parameters",
-               MsgBoxStyle.Critical,
-               "Something is wrong in the force")
-        Return "9999"
-    End Function
-
+        Return waitfordevices.Id
     ''' <summary>
     ''' 
     ''' </summary>
@@ -278,52 +329,46 @@ Er:
     ''' <returns></returns>
     Public Function Apkinstaller(apkpath As String)
         If Not silent Then
-            MsgBox("Installing " + apkpath + " to Device")
+            msbox("Installing " + apkpath + " to Device", 5, "Installing")
         End If
         Dim apkinstall As New Process
         With apkinstall
             .StartInfo.UseShellExecute = False
-            .StartInfo.RedirectStandardOutput = True
+            If silent Then
+                .StartInfo.RedirectStandardOutput = False
+            Else
+                .StartInfo.RedirectStandardOutput = True
+            End If
             .StartInfo.FileName = Adbpath
-            .StartInfo.Arguments = $"install -r ""{apkpath}"""
+            .StartInfo.Arguments = "install -r " + """" + apkpath + """"
             .StartInfo.WindowStyle = 1
             .Start()
             '.WaitForExit()
         End With
         Dim ed As String = apkinstall.StandardOutput.ReadToEnd.ToString()
         If silent Then
-            MsgBox(ed)                                              'remove when done or make part of program
+            msbox(ed)                                              'remove when done or make part of program
         Else
             Dim edarr() As String = ed.Split(vbCrLf)
             If apkresultbox.Visible = False Then
                 apkresultbox.Visible = True
             End If
             Select Case edarr.Length
+                Case 0
+                    apkresultbox.Items.Add("error: confirm from device")
                 Case 2
                     apkresultbox.Items.Add(edarr(0))
-                Case < 5
+                Case > 2
                     apkresultbox.Items.Add(edarr.GetValue(edarr.Length - 2))
-                Case >= 5
-                    apkresultbox.Items.Add(edarr(1))
-                    apkresultbox.Items.Add(edarr(2))
-                    apkresultbox.Items.Add(edarr.GetValue(edarr.Length - 3))
-                    apkresultbox.Items.Add(edarr.GetValue(edarr.Length - 2))
-                    apkresultbox.Items.Add(edarr.GetValue(edarr.Length - 1))
             End Select
             Dim counting As Timer = Timer1
-            With counting
-                .Interval = 5000
-                .Start()
-            End With
 
-        End If
-
-        Return ed
     End Function
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        Me.Hide()
-        Explorer1.Show()
+        FormUtils.MsgBoxDelayClose(Adbpath, 5, MsgBoxResult.Cancel, MsgBoxStyle.Critical, adb_version)
+        'Me.Hide()
+        'Explorer1.Show()
     End Sub
 End Class
 

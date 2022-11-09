@@ -5,6 +5,7 @@ Imports System.Threading
 
 Module FormUtils
     Public sAutoClosed As Boolean
+    Public Const sDefualtDelay As Integer = 5
 
     Public Sub CloseMsgBoxDelay(ByVal data As Object)
         Thread.Sleep(CInt(data))
@@ -12,13 +13,13 @@ Module FormUtils
         sAutoClosed = True
     End Sub
 
-    Public Function MsgBoxDelayClose(prompt As Object, Optional delay As Integer = 5, Optional delayedResult As MsgBoxResult = MsgBoxResult.Ok, Optional buttons As MsgBoxStyle = MsgBoxStyle.ApplicationModal, Optional title As Object = Nothing) As MsgBoxResult
-        Dim t As Thread
+    Public Function MsgBoxDelayClose(prompt As String, Optional buttons As MsgBoxStyle = MsgBoxStyle.ApplicationModal, Optional title As Object = Nothing, Optional delay As Integer = sDefualtDelay, Optional delayedResult As MsgBoxResult = MsgBoxResult.Ok) As MsgBoxResult
+        Dim t As New Thread(AddressOf CloseMsgBoxDelay)
 
         If delay > 0 Then
             sAutoClosed = False
             t = New Thread(AddressOf CloseMsgBoxDelay)
-            t.Start(delay)
+            t.Start(delay * 1000)
 
             MsgBoxDelayClose = MsgBox(prompt, buttons, title)
             If sAutoClosed Then
@@ -118,7 +119,7 @@ Public Class Form1
         End Select
 
 Er:
-        Dim msgBoxEr = Msbox("an error occurred whle getting program launch parameters" _
+        Dim msgBoxEr = MsgBoxDelayClose("an error occurred whle getting program launch parameters" _
                               + vbCrLf +
                               "all bets are off" _
                               + vbCrLf +
@@ -147,7 +148,7 @@ Er:
                     End If
                 Next
                 If Not adbfound Then
-                    Dim MsgBoxResult = Msbox("I can't find adb.exe, and i have really searched" _
+                    Dim MsgBoxResult = MsgBoxDelayClose("I can't find adb.exe, and i have really searched" _
                                               + vbCrLf _
                                               + "please use the select adb button to choose an adb.exe binary" _
                                               + vbCrLf _
@@ -165,7 +166,7 @@ Er:
                 End If
             End If
         Catch ex As System.ArgumentException
-            Dim msgBoxResult = Msbox(Promptpath)
+            Dim msgBoxResult = MsgBoxDelayClose(Promptpath)
         End Try
         Return Adbpath
     End Function
@@ -174,7 +175,7 @@ Er:
         Environment.SetEnvironmentVariable("adbpath", adbpath)               ' might end up using this in the end. but it's useless for now
         lbl_adbpath.Text = adbpath
         If Not running_quietly Then
-            Msbox("adb.exe was found in " + adbpath + vbCrLf + "I will therefore use it", 0, "Hurray adb.exe has been found", 5)
+            MsgBoxDelayClose("adb.exe was found in " + adbpath + vbCrLf + "I will therefore use it", 0, "Hurray adb.exe has been found", 5)
         End If
         ADB_btn.Text = "Change ADB"
         btn_apk.Enabled = True
@@ -258,7 +259,7 @@ Er:
         Try
             Adbpath = Adbpathdialog.FileName
         Catch
-            Msbox("cold feet?")
+            MsgBoxDelayClose("cold feet?")
         End Try
 
     End Sub
@@ -331,7 +332,7 @@ Er:
     ''' <returns></returns>
     Public Function Apkinstaller(apkpath As String)
         If Not running_quietly Then
-            Msbox("Installing " + apkpath + " to Device", 0, "Installing")
+            MsgBoxDelayClose("Installing " + apkpath + " to Device", 0, "Installing")
         End If
         Dim apkinstall As New Process
         With apkinstall
@@ -349,7 +350,7 @@ Er:
         End With
         Dim ed As String = apkinstall.StandardOutput.ReadToEnd.ToString()
         If running_quietly Then
-            Msbox(ed, 0, apkpath + " has finished installing")                                              'remove when done or make part of program
+            MsgBoxDelayClose(ed, 0, apkpath + " has finished installing")                                              'remove when done or make part of program
         Else
             Dim edarr() As String = ed.Split(vbCrLf)
             If apkresultbox.Visible = False Then

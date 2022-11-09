@@ -7,12 +7,12 @@ Module FormUtils
     Public sAutoClosed As Boolean
 
     Public Sub CloseMsgBoxDelay(ByVal data As Object)
-        System.Threading.Thread.Sleep(CInt(data))
-        SendKeys.SendWait("~")
+        Thread.Sleep(CInt(data))
+        SendKeys.SendWait(vbCrLf)
         sAutoClosed = True
     End Sub
 
-    Public Function MsgBoxDelayClose(prompt As Object, ByVal delay As Integer, Optional delayedResult As MsgBoxResult = MsgBoxResult.Ok, Optional buttons As MsgBoxStyle = MsgBoxStyle.ApplicationModal, Optional title As Object = Nothing) As MsgBoxResult
+    Public Function MsgBoxDelayClose(prompt As Object, Optional delay As Integer = 5, Optional delayedResult As MsgBoxResult = MsgBoxResult.Ok, Optional buttons As MsgBoxStyle = MsgBoxStyle.ApplicationModal, Optional title As Object = Nothing) As MsgBoxResult
         Dim t As Thread
 
         If delay > 0 Then
@@ -43,7 +43,7 @@ Public Class Form1
                                          + "or make sure adb.exe exist in the same directory as this application"
     Private Const grptxt1 = "Currently Using adb from: "
     Public Adbpath, apkpath, apkpaths() As String
-    Public silent = False, adbfound = False
+    Public running_quietly = False, adbfound = False
     Public adb_version As Integer
 
     Public Sub New()
@@ -54,25 +54,20 @@ Public Class Form1
 
     End Sub
 
-    Public Function msbox(data As String, Optional timeout As Integer = 5, Optional title As String = "Message box")
-        CreateObject("WScript.Shell").Popup(data, timeout, title)
+    Public Function Msbox(data As String, Optional buttons As MsgBoxStyle = vbOKOnly, Optional title As String = "Message box", Optional timeout As Integer = 5)
+        CreateObject("WScript.Shell").Popup(data, timeout, title, buttons)
         Return "done"
     End Function
 
     Public Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Call Getlaunchparam()                                 'collecting launch arguments and parameters and determine if running silent
-        If silent Then
-            Dispose(True)
+        Call Getlaunchparam()                                 'collecting launch arguments and parameters and determine if running running_quietly
+        If running_quietly Then
+            Dispose(disposing:=True)
             Application.ExitThread()
             Exit Sub
         End If
         Call CheckIfRunning()                                 'checking if ADB is already running
     End Sub
-
-
-
-
-
 
     Private Sub Btn_about_Click(sender As Object, e As EventArgs) Handles btn_about.Click
         Me.Hide()
@@ -104,12 +99,12 @@ Public Class Form1
         On Error GoTo Er
         Select Case Environment.GetCommandLineArgs().Length
             Case Is <= 1
-                silent = False
+                running_quietly = False
                 'MsgBox(startargs(0))
                 'Call Apkinstaller(startargs(0))
                 Exit Function
             Case Else
-                silent = True
+                running_quietly = True
                 Call CheckIfRunning()
                 Call Waitfordevice()
                 For i As Integer = 1 To Environment.GetCommandLineArgs().Length - 1
@@ -121,8 +116,15 @@ Public Class Form1
                 'Me.Dispose()
 
         End Select
+
 Er:
-        Dim msgBoxEr = MsgBox("an error occurred whle getting program launch parameters",
+        Dim msgBoxEr = Msbox("an error occurred whle getting program launch parameters" _
+                              + vbCrLf +
+                              "all bets are off" _
+                              + vbCrLf +
+                              "i wonder how you were able to launch a program without it's launch parameters" _
+                              + vbCrLf +
+                              "i would've loved to help you but alas i am just a humble program",
                MsgBoxStyle.Critical,
                "Something is wrong in the force")
         Return "9999"
@@ -130,8 +132,7 @@ Er:
     Public Function Testadbpath()
         Try
             If File.Exists($"{FileSystem.CurrentDirectory}\adb.exe") Then
-                Adbpath = CurDir() _
-                            + "\adb.exe"
+                Adbpath = $"{CurDir()}\adb.exe"
                 GroupBox1.Text = grptxt1 + "(Current Directory)"
                 Call Func_adbfound(Adbpath)
             Else
@@ -146,7 +147,7 @@ Er:
                     End If
                 Next
                 If Not adbfound Then
-                    Dim MsgBoxResult = MsgBox("I can't find adb.exe, and i have really searched" _
+                    Dim MsgBoxResult = Msbox("I can't find adb.exe, and i have really searched" _
                                               + vbCrLf _
                                               + "please use the select adb button to choose an adb.exe binary" _
                                               + vbCrLf _
@@ -164,7 +165,7 @@ Er:
                 End If
             End If
         Catch ex As System.ArgumentException
-            Dim msgBoxResult = MessageBox.Show(Promptpath)
+            Dim msgBoxResult = Msbox(Promptpath)
         End Try
         Return Adbpath
     End Function
@@ -172,8 +173,8 @@ Er:
         adbfound = True
         Environment.SetEnvironmentVariable("adbpath", adbpath)               ' might end up using this in the end. but it's useless for now
         lbl_adbpath.Text = adbpath
-        If Not silent Then
-            msbox("adb.exe was found in " + adbpath + vbCrLf + "I will therefore use it", 4, "Hurray adb.exe has been found")
+        If Not running_quietly Then
+            Msbox("adb.exe was found in " + adbpath + vbCrLf + "I will therefore use it", 0, "Hurray adb.exe has been found", 5)
         End If
         ADB_btn.Text = "Change ADB"
         btn_apk.Enabled = True
@@ -213,7 +214,7 @@ Er:
         Next
     End Sub
 
-    Private Sub darkcheck_CheckedChanged(sender As Object, e As EventArgs) Handles darkcheck.CheckedChanged
+    Private Sub Darkcheck_CheckedChanged(sender As Object, e As EventArgs) Handles darkcheck.CheckedChanged
         If darkcheck.Checked Then
             Environment.SetEnvironmentVariable("darkmode", "dark", EnvironmentVariableTarget.User)
         Else
@@ -257,7 +258,7 @@ Er:
         Try
             Adbpath = Adbpathdialog.FileName
         Catch
-            MsgBox("cold feet?")
+            Msbox("cold feet?")
         End Try
 
     End Sub
@@ -322,19 +323,20 @@ Er:
         End Using
 
         Return waitfordevices.Id
+    End Function
     ''' <summary>
     ''' 
     ''' </summary>
     ''' <param name="apkpath"></param>
     ''' <returns></returns>
     Public Function Apkinstaller(apkpath As String)
-        If Not silent Then
-            msbox("Installing " + apkpath + " to Device", 5, "Installing")
+        If Not running_quietly Then
+            Msbox("Installing " + apkpath + " to Device", 0, "Installing")
         End If
         Dim apkinstall As New Process
         With apkinstall
             .StartInfo.UseShellExecute = False
-            If silent Then
+            If running_quietly Then
                 .StartInfo.RedirectStandardOutput = False
             Else
                 .StartInfo.RedirectStandardOutput = True
@@ -346,8 +348,8 @@ Er:
             '.WaitForExit()
         End With
         Dim ed As String = apkinstall.StandardOutput.ReadToEnd.ToString()
-        If silent Then
-            msbox(ed)                                              'remove when done or make part of program
+        If running_quietly Then
+            Msbox(ed, 0, apkpath + " has finished installing")                                              'remove when done or make part of program
         Else
             Dim edarr() As String = ed.Split(vbCrLf)
             If apkresultbox.Visible = False Then
@@ -361,12 +363,12 @@ Er:
                 Case > 2
                     apkresultbox.Items.Add(edarr.GetValue(edarr.Length - 2))
             End Select
-            Dim counting As Timer = Timer1
-
+        End If
+        Return ed
     End Function
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        FormUtils.MsgBoxDelayClose(Adbpath, 5, MsgBoxResult.Cancel, MsgBoxStyle.Critical, adb_version)
+        FormUtils.MsgBoxDelayClose(Adbpath, 5, MsgBoxResult.Ok, MsgBoxStyle.OkCancel, adb_version)
         'Me.Hide()
         'Explorer1.Show()
     End Sub
